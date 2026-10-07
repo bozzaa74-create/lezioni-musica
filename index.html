@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Registro Lezioni Musica</title>
+  
+  <!-- SheetJS Library for Excel Export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    :root {
+      /* Verdino ancora più chiaro, luminoso e delicato con trasparenza Glassmorphism */
+      --sage-50: #fafcf8;
+      --sage-100: rgba(240, 247, 233, 0.85);
+      --sage-200: #dcebd0;
+      --sage-300: #b8d99f;
+      --sage-500: #6f9949;
+      --sage-600: #577d36;
+      --sage-700: #425f28;
+      --sage-800: #2a3c19;
+      
+      --glass-bg: rgba(255, 255, 255, 0.72);
+      --glass-border: rgba(220, 235, 208, 0.6);
+      --slate-50: rgba(248, 250, 252, 0.8);
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-500: #64748b;
+      --slate-700: #334155;
+      --slate-800: #1e293b;
+    }
+
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+      -webkit-tap-highlight-color: transparent; 
+    }
+
+    body { 
+      /* Sfondo sfumato leggerissimo e luminoso */
+      background: linear-gradient(135deg, #f7faf5 0%, #edf5e6 50%, #f4f9f0 100%);
+      background-attachment: fixed;
+      color: var(--slate-800); 
+      padding-bottom: 90px; 
+      min-height: 100vh;
+    }
+
+    header { 
+      background: rgba(87, 125, 54, 0.85); 
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      color: white; 
+      padding: 14px 16px; 
+      position: sticky; 
+      top: 0; 
+      z-index: 30; 
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    header h1 { font-size: 18px; font-weight: bold; }
+    header p { font-size: 12px; color: #eaf5e1; }
+
+    main { max-width: 480px; margin: 0 auto; padding: 16px; }
+
+    .card { 
+      background: var(--glass-bg); 
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 20px; 
+      padding: 16px; 
+      margin-bottom: 16px; 
+      border: 1px solid var(--glass-border); 
+      box-shadow: 0 8px 32px 0 rgba(140, 175, 110, 0.07); 
+    }
+
+    .card-title { 
+      font-weight: bold; 
+      font-size: 16px; 
+      color: var(--sage-800); 
+      margin-bottom: 8px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+    }
+
+    .badge { 
+      font-size: 11px; 
+      background: rgba(184, 217, 159, 0.35); 
+      color: var(--sage-800); 
+      padding: 4px 10px; 
+      border-radius: 12px; 
+      font-weight: 600; 
+      border: 1px solid rgba(184, 217, 159, 0.5);
+    }
+
+    label { display: block; font-size: 11px; font-weight: 600; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; }
+
+    input, select { 
+      width: 100%; 
+      padding: 10px 12px; 
+      background: rgba(255, 255, 255, 0.85); 
+      border: 1px solid rgba(184, 217, 159, 0.6); 
+      border-radius: 12px; 
+      font-size: 14px; 
+      outline: none; 
+      margin-bottom: 12px; 
+      backdrop-filter: blur(4px);
+    }
+    input:focus, select:focus { border-color: var(--sage-500); background: rgba(255, 255, 255, 0.98); }
+
+    .btn { 
+      width: 100%; 
+      background: linear-gradient(135deg, rgba(111, 153, 73, 0.92) 0%, rgba(87, 125, 54, 0.92) 100%); 
+      backdrop-filter: blur(4px);
+      color: white; 
+      font-weight: bold; 
+      padding: 12px; 
+      border: 1px solid rgba(255, 255, 255, 0.3); 
+      border-radius: 12px; 
+      font-size: 14px; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 8px; 
+      box-shadow: 0 4px 14px rgba(87, 125, 54, 0.15); 
+      transition: all 0.2s ease;
+    }
+    .btn:active { transform: scale(0.98); opacity: 0.9; }
+    
+    .btn-excel { 
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.88) 0%, rgba(22, 163, 74, 0.88) 100%); 
+      color: white; 
+    }
+    .btn-secondary { 
+      background: rgba(240, 247, 233, 0.9); 
+      color: var(--sage-800); 
+      border: 1px solid var(--sage-200);
+      box-shadow: none; 
+    }
+    .btn-blue { 
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.88) 0%, rgba(37, 99, 235, 0.88) 100%); 
+      color: white; 
+    }
+    .btn-danger { 
+      background: rgba(255, 241, 242, 0.8); 
+      color: #9f1239; 
+      border: 1px solid #fecdd3;
+      box-shadow: none; 
+    }
+
+    .grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; text-align: center; margin-top: 8px; }
+    @media (min-width: 400px) {
+      .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    .stat-box { padding: 8px; border-radius: 12px; border: 1px solid #e2e8f0; backdrop-filter: blur(4px); }
+    .stat-box.green { background: rgba(236, 253, 245, 0.75); border-color: #a7f3d0; color: #065f46; }
+    .stat-box.yellow { background: rgba(255, 251, 235, 0.75); border-color: #fde68a; color: #92400e; }
+    .stat-box.red { background: rgba(255, 241, 242, 0.75); border-color: #fecdd3; color: #9f1239; }
+    .stat-box.purple { background: rgba(245, 243, 255, 0.75); border-color: #ddd6fe; color: #5b21b6; }
+    .stat-box.orange { background: rgba(255, 247, 237, 0.75); border-color: #ffedd5; color: #9a3412; }
+    .stat-num { font-size: 18px; font-weight: bold; }
+    .stat-desc { font-size: 10px; font-weight: 500; }
+
+    .total-banner { 
+      background: linear-gradient(135deg, rgba(87, 125, 54, 0.88) 0%, rgba(66, 95, 40, 0.88) 100%); 
+      backdrop-filter: blur(10px);
+      color: white; 
+      border-radius: 20px; 
+      padding: 16px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 16px; 
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 24px rgba(66, 95, 40, 0.12);
+    }
+    .total-amount { font-size: 22px; font-weight: 900; color: #bbf7d0; }
+
+    nav { 
+      position: fixed; 
+      bottom: 0; 
+      left: 0; 
+      right: 0; 
+      background: rgba(255, 255, 255, 0.8); 
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-top: 1px solid var(--glass-border); 
+      padding: 8px 16px; 
+      z-index: 30; 
+    }
+    .nav-container { max-width: 480px; margin: 0 auto; display: flex; justify-content: space-around; }
+    .nav-btn { 
+      border: none; 
+      background: none; 
+      color: var(--slate-500); 
+      font-size: 11px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      gap: 4px; 
+    }
+    .nav-btn.active { color: var(--sage-700); font-weight: bold; }
+
+    .hidden { display: none; }
+
+    #toast { 
+      position: fixed; 
+      top: 60px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      background: rgba(42, 60, 25, 0.92); 
+      backdrop-filter: blur(8px);
+      color: white; 
+      padding: 8px 16px; 
+      border-radius: 20px; 
+      font-size: 13px; 
+      font-weight: 500; 
+      opacity: 0; 
+      transition: opacity 0.3s; 
+      pointer-events: none; 
+      z-index: 50; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    #toast.show { opacity: 1; }
+
+    .date-ctrl { display: flex; gap: 8px; align-items: center; }
+    .date-ctrl button { 
+      background: rgba(255, 255, 255, 0.8); 
+      border: 1px solid var(--sage-200); 
+      border-radius: 12px; 
+      width: 38px; 
+      height: 38px; 
+      font-size: 18px; 
+      cursor: pointer; 
+      color: var(--sage-700); 
+      backdrop-filter: blur(4px);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>Lezioni di Musica</h1>
+      <p>Registro & Contabilità</p>
+    </div>
+    <button onclick="switchTab('options')" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">⚙️</button>
+  </header>
+
+  <div id="toast">Salvato con successo!</div>
+
+  <main>
+
+    <!-- TAB 1: REGISTRO GIORNALIERO -->
+    <section id="tab-register">
+      
+      <div class="card">
+        <label>Seleziona Data</label>
+        <div class="date-ctrl">
+          <button onclick="changeDate(-1)">❮</button>
+          <input type="date" id="selected-date" onchange="loadDateData()" style="margin-bottom:0; text-align:center; font-weight:bold;">
+          <button onclick="changeDate(1)">❯</button>
+        </div>
+      </div>
+
+      <!-- Bambino 1 -->
+      <div class="card">
+        <div class="card-title">
+          <span id="child1-name-display">Bambino 1</span>
+          <span id="child1-instrument-display" class="badge">Batteria (€ 22.50)</span>
+        </div>
+
+        <label>Stato Lezione</label>
+        <select id="child1-status">
+          <option value="none">⚪ Nessuna / Non prevista</option>
+          <option value="done">🟢 Fatta</option>
+          <option value="recover">🟡 Da recuperare</option>
+          <option value="paid_not_done">🔴 Pagata ma non fatta</option>
+          <option value="absent_teacher">🟣 Assenza Maestro</option>
+          <option value="absent_student">🟠 Assenza Alunno</option>
+        </select>
+
+        <label>Note</label>
+        <input type="text" id="child1-note" placeholder="Note facoltative...">
+
+        <button onclick="saveChildData(1)" class="btn">
+          💾 SALVA PER <span id="child1-btn-name">BAMBINO 1</span>
+        </button>
+      </div>
+
+      <!-- Bambino 2 -->
+      <div class="card">
+        <div class="card-title">
+          <span id="child2-name-display">Bambino 2</span>
+          <span id="child2-instrument-display" class="badge">Chitarra (€ 20.00)</span>
+        </div>
+
+        <label>Stato Lezione</label>
+        <select id="child2-status">
+          <option value="none">⚪ Nessuna / Non prevista</option>
+          <option value="done">🟢 Fatta</option>
+          <option value="recover">🟡 Da recuperare</option>
+          <option value="paid_not_done">🔴 Pagata ma non fatta</option>
+          <option value="absent_teacher">🟣 Assenza Maestro</option>
+          <option value="absent_student">🟠 Assenza Alunno</option>
+        </select>
+
+        <label>Note</label>
+        <input type="text" id="child2-note" placeholder="Note facoltative...">
+
+        <button onclick="saveChildData(2)" class="btn">
+          💾 SALVA PER <span id="child2-btn-name">BAMBINO 2</span>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- TAB 2: RIEPILOGO MENSILE E CONTO -->
+    <section id="tab-summary" class="hidden">
+      
+      <div class="card">
+        <label>Mese & Anno</label>
+        <input type="month" id="summary-month" onchange="renderSummary()" style="margin-bottom:0; font-weight:bold;">
+      </div>
+
+      <!-- Report Bambino 1 -->
+      <div class="card">
+        <div class="card-title">
+          <div>
+            <div id="summary-child1-name">Bambino 1</div>
+            <div id="summary-child1-sub" style="font-size:11px; color:var(--slate-500); font-weight:normal;">Batteria • € 22,50/lez.</div>
+          </div>
+          <span id="summary-child1-price-total" style="font-size:18px; font-weight:900; color:var(--sage-700);">€ 0,00</span>
+        </div>
+
+        <div class="grid-4">
+          <div class="stat-box green">
+            <div class="stat-num" id="c1-done">0</div>
+            <div class="stat-desc">Fatte</div>
+          </div>
+          <div class="stat-box yellow">
+            <div class="stat-num" id="c1-recover">0</div>
+            <div class="stat-desc">Recupero</div>
+          </div>
+          <div class="stat-box red">
+            <div class="stat-num" id="c1-paid-not-done">0</div>
+            <div class="stat-desc">Pagate N.F.</div>
+          </div>
+          <div class="stat-box purple">
+            <div class="stat-num" id="c1-absent-teacher">0</div>
+            <div class="stat-desc">Ass. Maestro</div>
+          </div>
+          <div class="stat-box orange" style="grid-column: span 2;">
+            <div class="stat-num" id="c1-absent-student">0</div>
+            <div class="stat-desc">Assenza Alunno</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report Bambino 2 -->
+      <div class="card">
+        <div class="card-title">
+          <div>
+            <div id="summary-child2-name">Bambino 2</div>
+            <div id="summary-child2-sub" style="font-size:11px; color:var(--slate-500); font-weight:normal;">Chitarra • € 20,00/lez.</div>
+          </div>
+          <span id="summary-child2-price-total" style="font-size:18px; font-weight:900; color:var(--sage-700);">€ 0,00</span>
+        </div>
+
+        <div class="grid-4">
+          <div class="stat-box green">
+            <div class="stat-num" id="c2-done">0</div>
+            <div class="stat-desc">Fatte</div>
+          </div>
+          <div class="stat-box yellow">
+            <div class="stat-num" id="c2-recover">0</div>
+            <div class="stat-desc">Recupero</div>
+          </div>
+          <div class="stat-box red">
+            <div class="stat-num" id="c2-paid-not-done">0</div>
+            <div class="stat-desc">Pagate N.F.</div>
+          </div>
+          <div class="stat-box purple">
+            <div class="stat-num" id="c2-absent-teacher">0</div>
+            <div class="stat-desc">Ass. Maestro</div>
+          </div>
+          <div class="stat-box orange" style="grid-column: span 2;">
+            <div class="stat-num" id="c2-absent-student">0</div>
+            <div class="stat-desc">Assenza Alunno</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Totale Complessivo Mensile -->
+      <div class="total-banner">
+        <div>
+          <div style="font-size:11px; opacity:0.85; text-transform:uppercase; font-weight:600;">Totale Mese</div>
+          <div style="font-size:12px; opacity:0.95;">Somma lezioni fatte e pagate</div>
+        </div>
+        <div id="grand-total-price" class="total-amount">€ 0,00</div>
+      </div>
+
+      <!-- Lista Dettagliata Mensile -->
+      <div class="card">
+        <label>Dettaglio Giornaliero</label>
+        <div id="monthly-history-list" style="max-height:200px; overflow-y:auto; font-size:12px;">
+          <!-- Popolato via JS -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TAB 3: OPZIONI / CONFIGURAZIONE -->
+    <section id="tab-options" class="hidden">
+      <div class="card">
+        <div class="card-title" style="border-bottom:1px solid rgba(220, 235, 208, 0.6); padding-bottom:8px;">Configurazione Bambini & Prezzi</div>
+
+        <!-- Bambino 1 -->
+        <div style="margin-top:12px;">
+          <label>Nome Bambino 1</label>
+          <input type="text" id="cfg-child1-name">
+          <div style="display:flex; gap:8px;">
+            <div style="flex:1;">
+              <label>Strumento</label>
+              <input type="text" id="cfg-child1-instr">
+            </div>
+            <div style="flex:1;">
+              <label>Prezzo/Lez. (€)</label>
+              <input type="number" step="0.50" id="cfg-child1-price">
+            </div>
+          </div>
+        </div>
+
+        <hr style="border:none; border-top:1px solid rgba(220, 235, 208, 0.6); margin:12px 0;">
+
+        <!-- Bambino 2 -->
+        <div>
+          <label>Nome Bambino 2</label>
+          <input type="text" id="cfg-child2-name">
+          <div style="display:flex; gap:8px;">
+            <div style="flex:1;">
+              <label>Strumento</label>
+              <input type="text" id="cfg-child2-instr">
+            </div>
+            <div style="flex:1;">
+              <label>Prezzo/Lez. (€)</label>
+              <input type="number" step="0.50" id="cfg-child2-price">
+            </div>
+          </div>
+        </div>
+
+        <button onclick="saveSettings()" class="btn" style="margin-top:8px;">
+          Salva Impostazioni
+        </button>
+      </div>
+
+      <div class="card">
+        <label>Esportazione Excel</label>
+        <p style="font-size:11px; color:var(--slate-500); margin-bottom:12px;">Scarica i dati registrati in formato Excel (.xlsx) diviso con un foglio per ogni mese.</p>
+        
+        <button onclick="exportToExcel()" class="btn btn-excel">
+          📊 ESPORTA IN FOGLIO EXCEL (.XLSX)
+        </button>
+      </div>
+
+      <div class="card">
+        <label>Backup & Trasferimento Dati</label>
+        <p style="font-size:11px; color:var(--slate-500); margin-bottom:12px;">Salva una copia completa dei dati o carica un backup per sincronizzare un altro dispositivo.</p>
+        
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button onclick="exportData()" class="btn btn-secondary" style="font-size:13px;">
+            💾 Crea Backup (Scarica file .json)
+          </button>
+          
+          <button onclick="document.getElementById('import-file-input').click()" class="btn btn-blue" style="font-size:13px;">
+            📂 Ripristina / Carica Backup da Altro Dispositivo
+          </button>
+          <input type="file" id="import-file-input" accept=".json" style="display:none;" onchange="importData(event)">
+
+          <hr style="border:none; border-top:1px solid rgba(220, 235, 208, 0.6); margin:8px 0;">
+
+          <button onclick="clearData()" class="btn btn-danger" style="font-size:12px;">Cancella Tutti i Dati</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav>
+    <div class="nav-container">
+      <button onclick="switchTab('register')" id="nav-register" class="nav-btn active">
+        <span style="font-size:16px;">📅</span>
+        <span>Registro</span>
+      </button>
+      <button onclick="switchTab('summary')" id="nav-summary" class="nav-btn">
+        <span style="font-size:16px;">📊</span>
+        <span>Riepilogo</span>
+      </button>
+      <button onclick="switchTab('options')" id="nav-options" class="nav-btn">
+        <span style="font-size:16px;">⚙️</span>
+        <span>Opzioni</span>
+      </button>
+    </div>
+  </nav>
+
+  <script>
+    let config = JSON.parse(localStorage.getItem('music_app_config')) || {
+      child1: { name: "Bambino 1", instrument: "Batteria", price: 22.50 },
+      child2: { name: "Bambino 2", instrument: "Chitarra", price: 20.00 }
+    };
+
+    let entries = JSON.parse(localStorage.getItem('music_app_entries')) || {};
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('selected-date').value = today;
+      document.getElementById('summary-month').value = today.substring(0, 7);
+
+      applyConfig();
+      loadDateData();
+    });
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if (activeNav) activeNav.classList.add('active');
+
+      if (tabId === 'summary') renderSummary();
+    }
+
+    function applyConfig() {
+      document.getElementById('child1-name-display').innerText = config.child1.name;
+      document.getElementById('child1-instrument-display').innerText = `${config.child1.instrument} (€ ${config.child1.price.toFixed(2)})`;
+      document.getElementById('child1-btn-name').innerText = config.child1.name.toUpperCase();
+
+      document.getElementById('child2-name-display').innerText = config.child2.name;
+      document.getElementById('child2-instrument-display').innerText = `${config.child2.instrument} (€ ${config.child2.price.toFixed(2)})`;
+      document.getElementById('child2-btn-name').innerText = config.child2.name.toUpperCase();
+
+      document.getElementById('cfg-child1-name').value = config.child1.name;
+      document.getElementById('cfg-child1-instr').value = config.child1.instrument;
+      document.getElementById('cfg-child1-price').value = config.child1.price;
+
+      document.getElementById('cfg-child2-name').value = config.child2.name;
+      document.getElementById('cfg-child2-instr').value = config.child2.instrument;
+      document.getElementById('cfg-child2-price').value = config.child2.price;
+    }
+
+    function changeDate(delta) {
+      const dateInput = document.getElementById('selected-date');
+      const curr = new Date(dateInput.value || new Date());
+      curr.setDate(curr.getDate() + delta);
+      dateInput.value = curr.toISOString().split('T')[0];
+      loadDateData();
+    }
+
+    function loadDateData() {
+      const date = document.getElementById('selected-date').value;
+      const dayData = entries[date] || {};
+
+      document.getElementById('child1-status').value = dayData.child1?.status || 'none';
+      document.getElementById('child1-note').value = dayData.child1?.note || '';
+
+      document.getElementById('child2-status').value = dayData.child2?.status || 'none';
+      document.getElementById('child2-note').value = dayData.child2?.note || '';
+    }
+
+    function saveChildData(childNum) {
+      const date = document.getElementById('selected-date').value;
+      if (!date) return;
+
+      if (!entries[date]) entries[date] = {};
+
+      const childKey = `child${childNum}`;
+      entries[date][childKey] = {
+        status: document.getElementById(`${childKey}-status`).value,
+        note: document.getElementById(`${childKey}-note`).value
+      };
+
+      localStorage.setItem('music_app_entries', JSON.stringify(entries));
+      showToast("Salvataggio completato!");
+    }
+
+    function renderSummary() {
+      const monthStr = document.getElementById('summary-month').value;
+      if (!monthStr) return;
+
+      document.getElementById('summary-child1-name').innerText = config.child1.name;
+      document.getElementById('summary-child1-sub').innerText = `${config.child1.instrument} • € ${config.child1.price.toFixed(2)}/lez.`;
+
+      document.getElementById('summary-child2-name').innerText = config.child2.name;
+      document.getElementById('summary-child2-sub').innerText = `${config.child2.instrument} • € ${config.child2.price.toFixed(2)}/lez.`;
+
+      let c1 = { done: 0, recover: 0, paidNotDone: 0, absentTeacher: 0, absentStudent: 0 };
+      let c2 = { done: 0, recover: 0, paidNotDone: 0, absentTeacher: 0, absentStudent: 0 };
+
+      let historyHtml = '';
+
+      Object.keys(entries).sort().forEach(date => {
+        if (date.startsWith(monthStr)) {
+          const entry = entries[date];
+          
+          if (entry.child1) {
+            if (entry.child1.status === 'done') c1.done++;
+            if (entry.child1.status === 'recover') c1.recover++;
+            if (entry.child1.status === 'paid_not_done') c1.paidNotDone++;
+            if (entry.child1.status === 'absent_teacher') c1.absentTeacher++;
+            if (entry.child1.status === 'absent_student') c1.absentStudent++;
+          }
+
+          if (entry.child2) {
+            if (entry.child2.status === 'done') c2.done++;
+            if (entry.child2.status === 'recover') c2.recover++;
+            if (entry.child2.status === 'paid_not_done') c2.paidNotDone++;
+            if (entry.child2.status === 'absent_teacher') c2.absentTeacher++;
+            if (entry.child2.status === 'absent_student') c2.absentStudent++;
+          }
+
+          if ((entry.child1 && entry.child1.status !== 'none') || (entry.child2 && entry.child2.status !== 'none')) {
+            const formattedDate = date.split('-').reverse().join('/');
+            historyHtml += `<div style="padding:8px 0; border-bottom:1px solid rgba(220, 235, 208, 0.6);">
+              <strong style="color:var(--slate-800);">${formattedDate}</strong>`;
+            
+            if (entry.child1 && entry.child1.status !== 'none') {
+              historyHtml += `<div style="display:flex; justify-content:space-between; color:var(--slate-500);"><span>${config.child1.name}:</span> <span>${getStatusLabel(entry.child1.status)}</span></div>`;
+            }
+            if (entry.child2 && entry.child2.status !== 'none') {
+              historyHtml += `<div style="display:flex; justify-content:space-between; color:var(--slate-500);"><span>${config.child2.name}:</span> <span>${getStatusLabel(entry.child2.status)}</span></div>`;
+            }
+            historyHtml += `</div>`;
+          }
+        }
+      });
+
+      document.getElementById('c1-done').innerText = c1.done;
+      document.getElementById('c1-recover').innerText = c1.recover;
+      document.getElementById('c1-paid-not-done').innerText = c1.paidNotDone;
+      document.getElementById('c1-absent-teacher').innerText = c1.absentTeacher;
+      document.getElementById('c1-absent-student').innerText = c1.absentStudent;
+
+      document.getElementById('c2-done').innerText = c2.done;
+      document.getElementById('c2-recover').innerText = c2.recover;
+      document.getElementById('c2-paid-not-done').innerText = c2.paidNotDone;
+      document.getElementById('c2-absent-teacher').innerText = c2.absentTeacher;
+      document.getElementById('c2-absent-student').innerText = c2.absentStudent;
+
+      const c1TotalCount = c1.done + c1.paidNotDone;
+      const c1PriceTotal = c1TotalCount * config.child1.price;
+      document.getElementById('summary-child1-price-total').innerText = `€ ${c1PriceTotal.toFixed(2)}`;
+
+      const c2TotalCount = c2.done + c2.paidNotDone;
+      const c2PriceTotal = c2TotalCount * config.child2.price;
+      document.getElementById('summary-child2-price-total').innerText = `€ ${c2PriceTotal.toFixed(2)}`;
+
+      const grandTotal = c1PriceTotal + c2PriceTotal;
+      document.getElementById('grand-total-price').innerText = `€ ${grandTotal.toFixed(2)}`;
+
+      document.getElementById('monthly-history-list').innerHTML = historyHtml || `<p style="color:var(--slate-500); font-style:italic;">Nessuna lezione registrata per questo mese.</p>`;
+    }
+
+    function getStatusLabel(status) {
+      switch(status) {
+        case 'done': return '🟢 Fatta';
+        case 'recover': return '🟡 Da recuperare';
+        case 'paid_not_done': return '🔴 Pagata non fatta';
+        case 'absent_teacher': return '🟣 Assenza Maestro';
+        case 'absent_student': return '🟠 Assenza Alunno';
+        default: return '⚪ Non prevista';
+      }
+    }
+
+    function getStatusText(status) {
+      switch(status) {
+        case 'done': return 'Fatta';
+        case 'recover': return 'Da recuperare';
+        case 'paid_not_done': return 'Pagata ma non fatta';
+        case 'absent_teacher': return 'Assenza Maestro';
+        case 'absent_student': return 'Assenza Alunno';
+        default: return 'Non prevista';
+      }
+    }
+
+    function saveSettings() {
+      config.child1.name = document.getElementById('cfg-child1-name').value || "Bambino 1";
+      config.child1.instrument = document.getElementById('cfg-child1-instr').value || "Batteria";
+      config.child1.price = parseFloat(document.getElementById('cfg-child1-price').value) || 0;
+
+      config.child2.name = document.getElementById('cfg-child2-name').value || "Bambino 2";
+      config.child2.instrument = document.getElementById('cfg-child2-instr').value || "Chitarra";
+      config.child2.price = parseFloat(document.getElementById('cfg-child2-price').value) || 0;
+
+      localStorage.setItem('music_app_config', JSON.stringify(config));
+      applyConfig();
+      showToast("Impostazioni salvate!");
+    }
+
+    function exportToExcel() {
+      if (typeof XLSX === 'undefined') {
+        alert("Libreria Excel in caricamento... Riprova tra un secondo.");
+        return;
+      }
+
+      const dates = Object.keys(entries).sort();
+      if (dates.length === 0) {
+        alert("Non ci sono lezioni registrate da esportare.");
+        return;
+      }
+
+      const monthsMap = {};
+      dates.forEach(date => {
+        const monthKey = date.substring(0, 7);
+        if (!monthsMap[monthKey]) monthsMap[monthKey] = [];
+        monthsMap[monthKey].push(date);
+      });
+
+      const wb = XLSX.utils.book_new();
+
+      Object.keys(monthsMap).sort().forEach(monthKey => {
+        const sheetData = [];
+        
+        let c1Done = 0, c1PaidNotDone = 0, c1Recover = 0, c1AbsTeacher = 0, c1AbsStudent = 0;
+        let c2Done = 0, c2PaidNotDone = 0, c2Recover = 0, c2AbsTeacher = 0, c2AbsStudent = 0;
+
+        monthsMap[monthKey].forEach(date => {
+          const entry = entries[date];
+          if (entry.child1) {
+            if (entry.child1.status === 'done') c1Done++;
+            if (entry.child1.status === 'paid_not_done') c1PaidNotDone++;
+            if (entry.child1.status === 'recover') c1Recover++;
+            if (entry.child1.status === 'absent_teacher') c1AbsTeacher++;
+            if (entry.child1.status === 'absent_student') c1AbsStudent++;
+          }
+          if (entry.child2) {
+            if (entry.child2.status === 'done') c2Done++;
+            if (entry.child2.status === 'paid_not_done') c2PaidNotDone++;
+            if (entry.child2.status === 'recover') c2Recover++;
+            if (entry.child2.status === 'absent_teacher') c2AbsTeacher++;
+            if (entry.child2.status === 'absent_student') c2AbsStudent++;
+          }
+        });
+
+        const c1TotalCount = c1Done + c1PaidNotDone;
+        const c1Cost = c1TotalCount * config.child1.price;
+
+        const c2TotalCount = c2Done + c2PaidNotDone;
+        const c2Cost = c2TotalCount * config.child2.price;
+
+        const totalMonthCost = c1Cost + c2Cost;
+
+        sheetData.push([`RIEPILOGO LEZIONI MUSICA - MESE ${monthKey}`]);
+        sheetData.push([]);
+        sheetData.push([`Bambino 1: ${config.child1.name} (${config.child1.instrument})`, `€ ${config.child1.price.toFixed(2)} / lezione`]);
+        sheetData.push([`Lezioni Fatte: ${c1Done}`, `Da Recuperare: ${c1Recover}`, `Pagate N.F.: ${c1PaidNotDone}`, `Ass. Maestro: ${c1AbsTeacher}`, `Ass. Alunno: ${c1AbsStudent}`, `Totale Dovuto: € ${c1Cost.toFixed(2)}`]);
+        sheetData.push([]);
+        sheetData.push([`Bambino 2: ${config.child2.name} (${config.child2.instrument})`, `€ ${config.child2.price.toFixed(2)} / lezione`]);
+        sheetData.push([`Lezioni Fatte: ${c2Done}`, `Da Recuperare: ${c2Recover}`, `Pagate N.F.: ${c2PaidNotDone}`, `Ass. Maestro: ${c2AbsTeacher}`, `Ass. Alunno: ${c2AbsStudent}`, `Totale Dovuto: € ${c2Cost.toFixed(2)}`]);
+        sheetData.push([]);
+        sheetData.push([`TOTALE COMPLESSIVO MESE: € ${totalMonthCost.toFixed(2)}`]);
+        sheetData.push([]);
+        sheetData.push(["DATA", `STATO (${config.child1.name})`, `NOTE (${config.child1.name})`, `STATO (${config.child2.name})`, `NOTE (${config.child2.name})`]);
+
+        monthsMap[monthKey].forEach(date => {
+          const entry = entries[date];
+          const formattedDate = date.split('-').reverse().join('/');
+          
+          const c1Status = entry.child1 ? getStatusText(entry.child1.status) : '';
+          const c1Note = entry.child1 ? entry.child1.note || '' : '';
+
+          const c2Status = entry.child2 ? getStatusText(entry.child2.status) : '';
+          const c2Note = entry.child2 ? entry.child2.note || '' : '';
+
+          sheetData.push([formattedDate, c1Status, c1Note, c2Status, c2Note]);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(sheetData);
+        XLSX.utils.book_append_sheet(wb, ws, monthKey);
+      });
+
+      XLSX.writeFile(wb, `Registro_Lezioni_Musica.xlsx`);
+      showToast("File Excel generato!");
+    }
+
+    function exportData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ config, entries }));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `backup_lezioni_musica_${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast("Backup scaricato!");
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported.config && imported.entries) {
+            config = imported.config;
+            entries = imported.entries;
+            localStorage.setItem('music_app_config', JSON.stringify(config));
+            localStorage.setItem('music_app_entries', JSON.stringify(entries));
+            applyConfig();
+            loadDateData();
+            showToast("Dati ripristinati con successo!");
+          } else {
+            alert("Il file caricato non sembra essere un backup valido di questa app.");
+          }
+        } catch (err) {
+          alert("Errore nella lettura del file di backup.");
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function clearData() {
+      if (confirm("Sei sicuro di voler cancellare tutti i dati registrati?")) {
+        localStorage.removeItem('music_app_entries');
+        entries = {};
+        loadDateData();
+        showToast("Dati cancellati.");
+      }
+    }
+  </script>
+</body>
+</html>
