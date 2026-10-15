@@ -23,6 +23,7 @@ Released under the MIT license: http://jsbin.mit-license.org
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Registro Lezioni Musica</title>
   
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- SheetJS per esportazione Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
@@ -342,7 +343,10 @@ Released under the MIT license: http://jsbin.mit-license.org
       <h1>🎸 Lezioni Musica 🥁</h1>
       <p>Registro & Contabilità</p>
     </div>
-    <button onclick="switchTab('options')" style="background:var(--rock-black); color:var(--rock-gold); border:1.5px solid var(--rock-gold); border-radius:50%; width:38px; height:38px; font-size:16px; cursor:pointer;">⚙️</button>
+    <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-shrink:0;">
+      <button type="button" id="googleSignInBtn" onclick="googleSignIn()" style="width:auto;flex:none;background:#fff;color:#064e3b;border:1px solid rgba(255,255,255,.7);border-radius:8px;padding:6px 8px;font-size:12px;font-weight:600;line-height:1.25;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.12);cursor:pointer;">Accedi con Google</button>
+      <button onclick="switchTab('options')" aria-label="Impostazioni" style="background:var(--rock-black); color:var(--rock-gold); border:1.5px solid var(--rock-gold); border-radius:50%; width:38px; height:38px; font-size:16px; cursor:pointer;flex-shrink:0;">⚙️</button>
+    </div>
   </header>
 
   <div id="toast">Salvato con successo!</div>
@@ -591,6 +595,30 @@ Released under the MIT license: http://jsbin.mit-license.org
           🗑️ CANCELLA TUTTI I DATI
         </button>
       </div>
+
+      <div class="card" id="google-drive-card">
+        <div class="card-title">☁️ Google Drive</div>
+        <p style="font-size:12px;color:#bbb;line-height:1.5;margin-bottom:12px;">Accedi con Google per salvare e sincronizzare registro lezioni, impostazioni dei bambini e pagamenti su altri dispositivi.</p>
+        <div id="googleConfigFields">
+          <div id="googleConfigNotice" style="background:#332a12;border:1px solid #80631a;color:#ffdb78;border-radius:8px;padding:10px;font-size:12px;margin-bottom:12px;">Inserisci il Client ID OAuth di Google Cloud, quindi salva la configurazione.</div>
+          <label>Google OAuth Client ID</label>
+          <input id="googleClientId" autocomplete="off" placeholder="123456789-abc....apps.googleusercontent.com">
+          <button class="btn btn-secondary" onclick="saveGoogleConfig()" style="margin-bottom:10px;">SALVA CONFIGURAZIONE</button>
+        </div>
+        <div id="googleConfigSaved" class="hidden" style="border:1px solid var(--rock-green);border-radius:8px;padding:10px;color:var(--rock-green);font-size:12px;margin-bottom:10px;">Client ID configurato su questo dispositivo.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+          <button id="googleEditBtn" class="btn btn-danger hidden" onclick="editGoogleConfig()" style="width:auto;flex:1;font-size:12px;padding:10px;">MODIFICA CLIENT ID</button>
+
+          <button id="googleSignOutBtn" class="btn btn-danger" onclick="googleSignOut()" style="width:auto;flex:1;font-size:12px;padding:10px;">ESCI</button>
+        </div>
+        <p id="googleStatus" role="status" style="font-size:12px;color:#bbb;margin-bottom:12px;">Non collegato a Google Drive.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+          <button class="btn" onclick="driveBackup()" style="flex:1;font-size:12px;">☁️ BACKUP SU DRIVE</button>
+          <button class="btn btn-secondary" onclick="driveRestore()" style="flex:1;font-size:12px;">↩ RIPRISTINA DA DRIVE</button>
+        </div>
+        <label style="display:flex;align-items:flex-start;gap:8px;text-transform:none;font-size:12px;"><input id="googleAutoSync" type="checkbox" checked style="width:18px;margin:0;" onchange="saveAutoSync()"> <span>Sincronizzazione automatica: carica le modifiche e controlla Drive ogni 5 secondi mentre l’app è aperta e connessa.</span></label>
+        <p style="font-size:11px;color:#888;margin-top:10px;line-height:1.5;">Il backup è conservato nell’area privata dell’app su Google Drive (appDataFolder). L’accesso richiede un dominio HTTPS autorizzato; aprire il solo file HTML non è sufficiente.</p>
+      </div>
     </section>
 
   </main>
@@ -702,6 +730,7 @@ Released under the MIT license: http://jsbin.mit-license.org
       };
 
       localStorage.setItem('music_app_entries', JSON.stringify(entries));
+      markMusicEdited();
       showToast("Salvataggio completato!");
     }
 
@@ -783,12 +812,178 @@ Released under the MIT license: http://jsbin.mit-license.org
     }
 
     let blockPayments = JSON.parse(localStorage.getItem('music_app_block_payments') || '{}');
+    let googleTokenClient = null, googleAccessToken = null, googlePollTimer = null, googleSyncTimer = null;
+    let googleLastCloudModified = '', googleSyncBusy = false, googleLastLocalEdit = Number(localStorage.getItem('music_app_local_edit') || 0);
+    const googleDataFileName = 'registro-lezioni-musica-backup.json';
+    function markMusicEdited() {
+      googleLastLocalEdit = Date.now();
+      localStorage.setItem('music_app_local_edit', String(googleLastLocalEdit));
+      if (googleAccessToken) { clearTimeout(googleSyncTimer); googleSyncTimer = setTimeout(() => driveBackup(true), 1200); }
+    }
+    function musicSnapshot() { return { format:'registro-lezioni-musica', version:1, updatedAt:new Date().toISOString(), config, entries, blockPayments }; }
+    function applyMusicSnapshot(data, modifiedTime, quiet=false) {
+      if (!data || !data.config || !data.entries) throw new Error('Il backup non contiene dati riconoscibili.');
+      config = data.config; entries = data.entries; blockPayments = data.blockPayments || {};
+      localStorage.setItem('music_app_config', JSON.stringify(config));
+      localStorage.setItem('music_app_entries', JSON.stringify(entries));
+      localStorage.setItem('music_app_block_payments', JSON.stringify(blockPayments));
+      googleLastLocalEdit = 0; localStorage.setItem('music_app_local_edit','0');
+      googleLastCloudModified = modifiedTime || data.updatedAt || '';
+      applyConfig(); loadDateData();
+      if (!document.getElementById('tab-summary').classList.contains('hidden')) renderSummary();
+      if (!document.getElementById('tab-blocks').classList.contains('hidden')) renderBlocks();
+      if (!quiet) showToast('Dati ripristinati da Google Drive.');
+    }
+    function googleStatus(message) { const el=document.getElementById('googleStatus'); if(el) el.textContent=message; }
+    function showGoogleConfigSaved() {
+      document.getElementById('googleConfigFields').classList.add('hidden');
+      document.getElementById('googleConfigSaved').classList.remove('hidden');
+      document.getElementById('googleEditBtn').classList.remove('hidden');
+    }
+    function editGoogleConfig() {
+      document.getElementById('googleConfigFields').classList.remove('hidden');
+      document.getElementById('googleConfigSaved').classList.add('hidden');
+      document.getElementById('googleEditBtn').classList.add('hidden');
+      document.getElementById('googleClientId').value=localStorage.getItem('music_google_client_id')||'';
+    }
+    function loadGoogleLibrary() {
+      return new Promise((resolve,reject)=>{
+        if(window.google?.accounts?.oauth2) return resolve();
+        let script=document.querySelector('script[data-music-google="1"]');
+        if(!script){script=document.createElement('script');script.src='https://accounts.google.com/gsi/client';script.async=true;script.defer=true;script.dataset.musicGoogle='1';document.head.appendChild(script);}
+        let finished=false;
+        const finish=(err)=>{if(finished)return;finished=true;clearTimeout(timer);script.removeEventListener('load',loaded);script.removeEventListener('error',failed);err?reject(err):resolve();};
+        const loaded=()=>window.google?.accounts?.oauth2?finish():finish(new Error('Libreria Google non disponibile.'));
+        const failed=()=>finish(new Error('Impossibile caricare Google. Controlla la connessione.'));
+        script.addEventListener('load',loaded);script.addEventListener('error',failed);
+        const timer=setTimeout(()=>finish(new Error('Google non risponde. Riprova.')),10000);
+      });
+    }
+    function initGoogle() {
+      const id=localStorage.getItem('music_google_client_id');
+      if(!id){googleStatus('Inserisci il Client ID OAuth e salva la configurazione.');return false;}
+      if(!window.google?.accounts?.oauth2){googleStatus('Servizio Google in caricamento…');return false;}
+      try {
+        googleTokenClient=window.google.accounts.oauth2.initTokenClient({
+          client_id:id, scope:'https://www.googleapis.com/auth/drive.appdata',
+          callback:async response=>{
+            if(response.error){googleStatus('Accesso Google non riuscito: '+response.error);return;}
+            googleAccessToken=response.access_token;
+            document.getElementById('googleSignInBtn').classList.add('hidden');
+            googleStatus('Accesso riuscito. Sincronizzazione iniziale…');
+            await startMusicSync();
+          },
+          error_callback:error=>googleStatus('Impossibile aprire l’accesso Google: '+(error?.type||'errore browser')+'. Verifica HTTPS e popup.')
+        });
+        return true;
+      } catch(e){googleStatus('Client ID non valido: '+e.message);return false;}
+    }
+    async function saveGoogleConfig() {
+      const id=document.getElementById('googleClientId').value.trim();
+      if(!id){googleStatus('Inserisci prima il Client ID OAuth.');return;}
+      localStorage.setItem('music_google_client_id',id);
+      document.getElementById('googleConfigNotice').classList.add('hidden');
+      googleStatus('Configurazione salvata. Verifico Google…');
+      try{await loadGoogleLibrary();if(initGoogle()){showGoogleConfigSaved();googleStatus('Configurazione salvata. Ora premi Accedi con Google.');}}
+      catch(e){googleStatus('Configurazione salvata, ma Google non è disponibile: '+e.message);}
+    }
+    async function googleSignIn() {
+      try {
+        const id=document.getElementById('googleClientId').value.trim()||localStorage.getItem('music_google_client_id')||'';
+        if(!id){googleStatus('Inserisci il Client ID OAuth e premi Salva configurazione.');document.getElementById('googleClientId').focus();return;}
+        localStorage.setItem('music_google_client_id',id);
+        if(location.protocol!=='https:'&&location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'){googleStatus('Per accedere a Google, pubblica l’app su HTTPS e autorizza il dominio in Google Cloud.');return;}
+        await loadGoogleLibrary();if(!initGoogle()||!googleTokenClient)throw new Error('Impossibile inizializzare Google.');
+        showGoogleConfigSaved();googleStatus('Apro la finestra di accesso Google…');googleTokenClient.requestAccessToken();
+      } catch(e){googleStatus('Accesso non avviato: '+e.message);}
+    }
+    async function musicApi(url, options={}) {
+      if(!googleAccessToken)throw new Error('Accedi prima a Google.');
+      const response=await fetch(url,{...options,headers:{Authorization:'Bearer '+googleAccessToken,...(options.headers||{})}});
+      if(response.status===401){googleAccessToken=null;throw new Error('Sessione scaduta: accedi di nuovo.');}
+      if(!response.ok)throw new Error('Google Drive ha restituito errore ('+response.status+').');
+      return response.status===204?null:response.json();
+    }
+    async function findMusicDriveFile() {
+      const q=encodeURIComponent("name='"+googleDataFileName+"' and 'appDataFolder' in parents and trashed=false");
+      const result=await musicApi('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q='+q+'&fields=files(id,name,modifiedTime)');
+      return result.files?.[0]||null;
+    }
+    async function driveBackup(silent=false) {
+      if(!googleAccessToken){if(!silent)googleStatus('Premi prima Accedi con Google.');return;}
+      if(googleSyncBusy)return;googleSyncBusy=true;
+      try {
+        if(!silent)googleStatus('Backup su Google Drive in corso…');
+        const file=await findMusicDriveFile(), stamp=new Date().toISOString();
+        const snapshot=musicSnapshot();snapshot.updatedAt=stamp;
+        const boundary='music_boundary_'+Date.now();
+        const metadata={name:googleDataFileName,mimeType:'application/json',...(file?{}:{parents:['appDataFolder']})};
+        const url=file?'https://www.googleapis.com/upload/drive/v3/files/'+file.id+'?uploadType=multipart':'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+        const response=await fetch(url,{method:file?'PATCH':'POST',headers:{Authorization:'Bearer '+googleAccessToken,'Content-Type':'multipart/related; boundary='+boundary},body:'--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(metadata)+'\r\n--'+boundary+'\r\nContent-Type: application/json\r\n\r\n'+JSON.stringify(snapshot)+'\r\n--'+boundary+'--'});
+        if(!response.ok)throw new Error('Backup non riuscito ('+response.status+').');
+        const result=await response.json();googleLastCloudModified=result.modifiedTime||stamp;
+        if(!silent)googleStatus('Backup aggiornato alle '+new Date().toLocaleTimeString('it-IT')+'.');
+      } catch(e){if(!silent)googleStatus('Errore backup: '+e.message);}
+      finally{googleSyncBusy=false;}
+    }
+    async function driveRestore() {
+      try {
+        if(!googleAccessToken)throw new Error('Premi prima Accedi con Google.');
+        googleStatus('Ricerca del backup su Drive…');
+        const file=await findMusicDriveFile();if(!file)throw new Error('Non trovo un backup su questo account Google.');
+        const data=await musicApi('https://www.googleapis.com/drive/v3/files/'+file.id+'?alt=media');
+        if(!confirm('Il ripristino sostituirà registro, impostazioni e pagamenti locali con i dati di Google Drive. Continuare?'))return;
+        applyMusicSnapshot(data,file.modifiedTime);googleStatus('Ripristino completato da Google Drive.');
+      } catch(e){googleStatus('Ripristino non riuscito: '+e.message);}
+    }
+    async function syncMusicFromCloud() {
+      if(!googleAccessToken||googleSyncBusy||document.hidden)return;
+      try {
+        const file=await findMusicDriveFile();if(!file)return;
+        if(file.modifiedTime&&file.modifiedTime===googleLastCloudModified)return;
+        const data=await musicApi('https://www.googleapis.com/drive/v3/files/'+file.id+'?alt=media');
+        const cloudTime=Date.parse(data.updatedAt||file.modifiedTime||0);
+        if(googleLastLocalEdit&&googleLastLocalEdit>cloudTime){await driveBackup(true);return;}
+        applyMusicSnapshot(data,file.modifiedTime,true);
+        googleStatus('Sincronizzazione attiva · ultimo controllo '+new Date().toLocaleTimeString('it-IT'));
+      } catch(e){googleStatus('Sincronizzazione: '+e.message);}
+    }
+    async function startMusicSync() {
+      try {
+        const file=await findMusicDriveFile();
+        if(file){const data=await musicApi('https://www.googleapis.com/drive/v3/files/'+file.id+'?alt=media');applyMusicSnapshot(data,file.modifiedTime,true);googleStatus('Dati caricati da Google Drive. Controllo automatico ogni 5 secondi.');}
+        else {await driveBackup(true);googleStatus('Creato il primo backup su Drive. Controllo automatico ogni 5 secondi.');}
+      } catch(e){googleStatus('Sincronizzazione iniziale: '+e.message);}
+      if(googlePollTimer)clearInterval(googlePollTimer);
+      if(document.getElementById('googleAutoSync').checked)googlePollTimer=setInterval(syncMusicFromCloud,5000);
+    }
+    function saveAutoSync() {
+      if(document.getElementById('googleAutoSync').checked&&googleAccessToken){if(googlePollTimer)clearInterval(googlePollTimer);googlePollTimer=setInterval(syncMusicFromCloud,5000);syncMusicFromCloud();}
+      else if(googlePollTimer){clearInterval(googlePollTimer);googlePollTimer=null;}
+      localStorage.setItem('music_google_auto_sync',document.getElementById('googleAutoSync').checked?'true':'false');
+    }
+    function googleSignOut() {
+      if(googlePollTimer)clearInterval(googlePollTimer);googlePollTimer=null;
+      if(googleAccessToken&&window.google?.accounts?.oauth2)window.google.accounts.oauth2.revoke(googleAccessToken,()=>{});
+      googleAccessToken=null;googleTokenClient=null;
+      document.getElementById('googleSignInBtn').classList.remove('hidden');
+      googleStatus('Disconnesso. I dati locali restano disponibili.');
+    }
+    window.addEventListener('online',()=>{if(googleAccessToken)syncMusicFromCloud();});
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden&&googleAccessToken)syncMusicFromCloud();});
+    window.addEventListener('load',()=>{
+      const savedId=localStorage.getItem('music_google_client_id')||'';
+      document.getElementById('googleClientId').value=savedId;
+      if(savedId){document.getElementById('googleConfigNotice').classList.add('hidden');showGoogleConfigSaved();loadGoogleLibrary().then(()=>initGoogle()).catch(()=>googleStatus('Client ID salvato. Premi Salva configurazione per riprovare.'));}
+      document.getElementById('googleAutoSync').checked=localStorage.getItem('music_google_auto_sync')!=='false';
+    });
 
     function saveBlockPayment(childKey, blockId, field, value) {
       if (!blockPayments[childKey]) blockPayments[childKey] = {};
       if (!blockPayments[childKey][blockId]) blockPayments[childKey][blockId] = {};
       blockPayments[childKey][blockId][field] = value;
       localStorage.setItem('music_app_block_payments', JSON.stringify(blockPayments));
+      markMusicEdited();
       renderBlocks();
     }
 
@@ -883,6 +1078,7 @@ Released under the MIT license: http://jsbin.mit-license.org
       config.child2.price = parseFloat(document.getElementById('cfg-child2-price').value) || 0;
 
       localStorage.setItem('music_app_config', JSON.stringify(config));
+      markMusicEdited();
       applyConfig();
       showToast("Impostazioni salvate!");
     }
@@ -985,7 +1181,7 @@ Released under the MIT license: http://jsbin.mit-license.org
     }
 
     function exportData() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ config, entries }));
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ config, entries, blockPayments }));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
       downloadAnchor.setAttribute("download", `backup_lezioni_musica.json`);
@@ -1005,6 +1201,8 @@ Released under the MIT license: http://jsbin.mit-license.org
           if (importedData.config && importedData.entries) {
             localStorage.setItem('music_app_config', JSON.stringify(importedData.config));
             localStorage.setItem('music_app_entries', JSON.stringify(importedData.entries));
+            if (importedData.blockPayments) { blockPayments = importedData.blockPayments; localStorage.setItem('music_app_block_payments', JSON.stringify(blockPayments)); }
+            markMusicEdited();
             config = importedData.config;
             entries = importedData.entries;
             applyConfig();
@@ -1023,7 +1221,7 @@ Released under the MIT license: http://jsbin.mit-license.org
     function clearData() {
       if (confirm("Sei sicuro di voler cancellare tutti i dati registrati?")) {
         localStorage.removeItem('music_app_entries');
-        entries = {};
+        entries = {}; markMusicEdited();
         loadDateData();
         showToast("Dati cancellati.");
       }
