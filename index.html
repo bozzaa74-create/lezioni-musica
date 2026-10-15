@@ -1,88 +1,142 @@
 <!DOCTYPE html>
+<!--
+Created using JS Bin
+http://jsbin.com
+
+Copyright (c) 2026 by anonymous (http://jsbin.com/biceyepexi/1/edit)
+
+Released under the MIT license: http://jsbin.mit-license.org
+-->
+<meta name="robots" content="noindex">
+<!--
+Created using JS Bin
+http://jsbin.com
+
+Copyright (c) 2026 by anonymous (http://jsbin.com/tagemajita/6/edit)
+
+Released under the MIT license: http://jsbin.mit-license.org
+-->
+<meta name="robots" content="noindex">
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Registro Lezioni Musica</title>
   
-  <!-- SheetJS Library for Excel Export -->
+  <!-- SheetJS per esportazione Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Google Fonts: Inter (Semplice, pulito e leggibile) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      /* Verdino ancora più chiaro, luminoso e delicato con trasparenza Glassmorphism */
-      --sage-50: #fafcf8;
-      --sage-100: rgba(240, 247, 233, 0.85);
-      --sage-200: #dcebd0;
-      --sage-300: #b8d99f;
-      --sage-500: #6f9949;
-      --sage-600: #577d36;
-      --sage-700: #425f28;
-      --sage-800: #2a3c19;
-      
-      --glass-bg: rgba(255, 255, 255, 0.72);
-      --glass-border: rgba(220, 235, 208, 0.6);
-      --slate-50: rgba(248, 250, 252, 0.8);
-      --slate-100: #f1f5f9;
-      --slate-200: #e2e8f0;
-      --slate-500: #64748b;
-      --slate-700: #334155;
-      --slate-800: #1e293b;
+      --rock-bg: #121212;
+      --rock-card: #1e1e1e;
+      --rock-black: #0a0a0a;
+      --rock-red: #ff2a2a;
+      --rock-gold: #ffb703;
+      --rock-cyan: #00f0ff;
+      --rock-green: #39ff14;
+      --rock-purple: #b5179e;
+      --rock-orange: #ff6000;
+      --rock-text: #f0f0f0;
+      --rock-border: #333333;
     }
 
     * { 
       box-sizing: border-box; 
       margin: 0; 
       padding: 0; 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+      font-family: 'Inter', sans-serif; 
+      font-weight: 400;
       -webkit-tap-highlight-color: transparent; 
     }
 
     body { 
-      /* Sfondo sfumato leggerissimo e luminoso */
-      background: linear-gradient(135deg, #f7faf5 0%, #edf5e6 50%, #f4f9f0 100%);
-      background-attachment: fixed;
-      color: var(--slate-800); 
-      padding-bottom: 90px; 
-      min-height: 100vh;
+      background-color: var(--rock-bg); 
+      color: var(--rock-text); 
+      padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); 
+      background-image: 
+        radial-gradient(#222 15%, transparent 16%),
+        radial-gradient(#222 15%, transparent 16%);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
     }
 
+    /* SFONDO MUSICALE DECORATIVO */
+    .musical-bg-decor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.04;
+      overflow: hidden;
+      font-size: 50px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      align-content: space-around;
+    }
+
+    /* HEADER */
     header { 
-      background: rgba(87, 125, 54, 0.85); 
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      color: white; 
-      padding: 14px 16px; 
+      background-color: var(--rock-black); 
+      color: var(--rock-red); 
+      padding: 12px 16px; 
       position: sticky; 
       top: 0; 
       z-index: 30; 
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); 
+      border-bottom: 3px solid var(--rock-red); 
+      box-shadow: 0 4px 15px rgba(255, 42, 42, 0.3);
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
-      border-bottom: 1px solid rgba(255, 255, 255, 0.25);
     }
-    header h1 { font-size: 18px; font-weight: bold; }
-    header p { font-size: 12px; color: #eaf5e1; }
 
-    main { max-width: 480px; margin: 0 auto; padding: 16px; }
+    header h1 { 
+      font-size: 20px; 
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--rock-red);
+    }
 
-    .card { 
-      background: var(--glass-bg); 
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 20px; 
+    header p { 
+      font-size: 11px; 
+      color: var(--rock-gold); 
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    main { 
+      max-width: 480px; 
+      margin: 0 auto; 
       padding: 16px; 
-      margin-bottom: 16px; 
-      border: 1px solid var(--glass-border); 
-      box-shadow: 0 8px 32px 0 rgba(140, 175, 110, 0.07); 
+      position: relative;
+      z-index: 10;
+    }
+
+    /* CARD */
+    .card { 
+      background: var(--rock-card); 
+      border-radius: 12px; 
+      padding: 16px; 
+      margin-bottom: 20px; 
+      border: 2px solid var(--rock-border); 
+      box-shadow: 0 6px 12px rgba(0,0,0,0.5); 
     }
 
     .card-title { 
-      font-weight: bold; 
-      font-size: 16px; 
-      color: var(--sage-800); 
-      margin-bottom: 8px; 
+      font-size: 17px; 
+      font-weight: 600;
+      color: var(--rock-gold); 
+      margin-bottom: 12px; 
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
@@ -90,170 +144,205 @@
 
     .badge { 
       font-size: 11px; 
-      background: rgba(184, 217, 159, 0.35); 
-      color: var(--sage-800); 
+      background: var(--rock-black); 
+      color: var(--rock-cyan); 
       padding: 4px 10px; 
-      border-radius: 12px; 
-      font-weight: 600; 
-      border: 1px solid rgba(184, 217, 159, 0.5);
+      border-radius: 20px; 
+      border: 1px solid var(--rock-cyan);
     }
 
-    label { display: block; font-size: 11px; font-weight: 600; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; }
+    label { 
+      display: block; 
+      font-size: 12px; 
+      color: #bbbbbb; 
+      text-transform: uppercase; 
+      letter-spacing: 0.5px;
+      margin-bottom: 6px; 
+    }
 
     input, select { 
       width: 100%; 
-      padding: 10px 12px; 
-      background: rgba(255, 255, 255, 0.85); 
-      border: 1px solid rgba(184, 217, 159, 0.6); 
-      border-radius: 12px; 
+      padding: 12px; 
+      background: var(--rock-black); 
+      border: 1.5px solid var(--rock-border); 
+      border-radius: 8px; 
+      color: var(--rock-text);
       font-size: 14px; 
       outline: none; 
-      margin-bottom: 12px; 
-      backdrop-filter: blur(4px);
+      margin-bottom: 14px; 
     }
-    input:focus, select:focus { border-color: var(--sage-500); background: rgba(255, 255, 255, 0.98); }
 
+    input:focus, select:focus { 
+      border-color: var(--rock-red);
+    }
+
+    /* PULSANTI */
     .btn { 
       width: 100%; 
-      background: linear-gradient(135deg, rgba(111, 153, 73, 0.92) 0%, rgba(87, 125, 54, 0.92) 100%); 
-      backdrop-filter: blur(4px);
-      color: white; 
-      font-weight: bold; 
+      background: linear-gradient(180deg, #ff4d4d 0%, #cc0000 100%); 
+      color: #ffffff; 
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
       padding: 12px; 
-      border: 1px solid rgba(255, 255, 255, 0.3); 
-      border-radius: 12px; 
-      font-size: 14px; 
+      border: none; 
+      border-radius: 8px; 
       cursor: pointer; 
       display: flex; 
       align-items: center; 
       justify-content: center; 
       gap: 8px; 
-      box-shadow: 0 4px 14px rgba(87, 125, 54, 0.15); 
-      transition: all 0.2s ease;
-    }
-    .btn:active { transform: scale(0.98); opacity: 0.9; }
-    
-    .btn-excel { 
-      background: linear-gradient(135deg, rgba(34, 197, 94, 0.88) 0%, rgba(22, 163, 74, 0.88) 100%); 
-      color: white; 
-    }
-    .btn-secondary { 
-      background: rgba(240, 247, 233, 0.9); 
-      color: var(--sage-800); 
-      border: 1px solid var(--sage-200);
-      box-shadow: none; 
-    }
-    .btn-blue { 
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.88) 0%, rgba(37, 99, 235, 0.88) 100%); 
-      color: white; 
-    }
-    .btn-danger { 
-      background: rgba(255, 241, 242, 0.8); 
-      color: #9f1239; 
-      border: 1px solid #fecdd3;
-      box-shadow: none; 
+      box-shadow: 0 4px 10px rgba(204, 0, 0, 0.4); 
+      text-transform: uppercase;
     }
 
-    .grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; text-align: center; margin-top: 8px; }
-    @media (min-width: 400px) {
-      .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .btn:active { 
+      transform: translateY(2px);
     }
 
-    .stat-box { padding: 8px; border-radius: 12px; border: 1px solid #e2e8f0; backdrop-filter: blur(4px); }
-    .stat-box.green { background: rgba(236, 253, 245, 0.75); border-color: #a7f3d0; color: #065f46; }
-    .stat-box.yellow { background: rgba(255, 251, 235, 0.75); border-color: #fde68a; color: #92400e; }
-    .stat-box.red { background: rgba(255, 241, 242, 0.75); border-color: #fecdd3; color: #9f1239; }
-    .stat-box.purple { background: rgba(245, 243, 255, 0.75); border-color: #ddd6fe; color: #5b21b6; }
-    .stat-box.orange { background: rgba(255, 247, 237, 0.75); border-color: #ffedd5; color: #9a3412; }
-    .stat-num { font-size: 18px; font-weight: bold; }
-    .stat-desc { font-size: 10px; font-weight: 500; }
+    .btn-excel { background: linear-gradient(180deg, #00f0ff 0%, #0088cc 100%); color: #000; }
+    .btn-secondary { background: linear-gradient(180deg, #ffc107 0%, #ff8f00 100%); color: #000; }
+    .btn-pink { background: linear-gradient(180deg, #e040fb 0%, #aa00ff 100%); color: #fff; }
+    .btn-danger { background: linear-gradient(180deg, #333 0%, #111 100%); color: var(--rock-red); border: 1px solid var(--rock-red); }
+
+    /* RIEPILOGO MENSILE */
+    .grid-3 { 
+      display: grid; 
+      grid-template-columns: repeat(3, 1fr); 
+      gap: 8px; 
+      text-align: center; 
+      margin-top: 10px; 
+    }
+
+    .stat-box { 
+      padding: 8px; 
+      border-radius: 8px; 
+      background: var(--rock-black);
+      border: 1px solid var(--rock-border); 
+    }
+
+    .stat-box.green { border-color: var(--rock-green); color: var(--rock-green); }
+    .stat-box.yellow { border-color: var(--rock-gold); color: var(--rock-gold); }
+    .stat-box.red { border-color: var(--rock-red); color: var(--rock-red); }
+    .stat-box.purple { border-color: var(--rock-purple); color: var(--rock-purple); }
+    .stat-box.orange { border-color: var(--rock-orange); color: var(--rock-orange); }
+
+    .stat-num { font-size: 18px; font-weight: 500; }
+    .stat-desc { font-size: 10px; text-transform: uppercase; }
 
     .total-banner { 
-      background: linear-gradient(135deg, rgba(87, 125, 54, 0.88) 0%, rgba(66, 95, 40, 0.88) 100%); 
-      backdrop-filter: blur(10px);
-      color: white; 
-      border-radius: 20px; 
+      background: var(--rock-black); 
+      color: var(--rock-text); 
+      border-radius: 12px; 
       padding: 16px; 
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
-      margin-bottom: 16px; 
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 8px 24px rgba(66, 95, 40, 0.12);
+      margin-bottom: 20px; 
+      border: 2px solid var(--rock-gold);
     }
-    .total-amount { font-size: 22px; font-weight: 900; color: #bbf7d0; }
 
+    .total-amount { 
+      font-size: 26px; 
+      font-weight: 600;
+      color: var(--rock-gold); 
+    }
+
+    /* BARRA DI NAVIGAZIONE */
     nav { 
       position: fixed; 
       bottom: 0; 
       left: 0; 
       right: 0; 
-      background: rgba(255, 255, 255, 0.8); 
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border-top: 1px solid var(--glass-border); 
-      padding: 8px 16px; 
-      z-index: 30; 
+      background: var(--rock-black); 
+      border-top: 2px solid var(--rock-red); 
+      padding: 10px 8px; 
+      padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); 
+      z-index: 40; 
     }
-    .nav-container { max-width: 480px; margin: 0 auto; display: flex; justify-content: space-around; }
+
+    .nav-container { 
+      max-width: 480px; 
+      margin: 0 auto; 
+      display: flex; 
+      justify-content: space-around; 
+    }
+
     .nav-btn { 
-      border: none; 
+      border: 1px solid transparent; 
       background: none; 
-      color: var(--slate-500); 
+      color: #888; 
       font-size: 11px; 
-      font-weight: 600; 
+      font-weight: 500;
       cursor: pointer; 
       display: flex; 
       flex-direction: column; 
       align-items: center; 
-      gap: 4px; 
+      gap: 2px; 
+      padding: 6px 8px;
+      border-radius: 8px;
     }
-    .nav-btn.active { color: var(--sage-700); font-weight: bold; }
+
+    .nav-btn.active { 
+      background: var(--rock-card); 
+      color: var(--rock-red);
+      border-color: var(--rock-red);
+    }
 
     .hidden { display: none; }
 
     #toast { 
       position: fixed; 
-      top: 60px; 
+      top: 70px; 
       left: 50%; 
       transform: translateX(-50%); 
-      background: rgba(42, 60, 25, 0.92); 
-      backdrop-filter: blur(8px);
-      color: white; 
-      padding: 8px 16px; 
-      border-radius: 20px; 
+      background: var(--rock-red); 
+      color: #fff; 
+      padding: 10px 20px; 
+      border-radius: 30px; 
       font-size: 13px; 
-      font-weight: 500; 
+      box-shadow: 0 0 15px rgba(255,42,42,0.6);
       opacity: 0; 
       transition: opacity 0.3s; 
       pointer-events: none; 
       z-index: 50; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
+
     #toast.show { opacity: 1; }
 
     .date-ctrl { display: flex; gap: 8px; align-items: center; }
     .date-ctrl button { 
-      background: rgba(255, 255, 255, 0.8); 
-      border: 1px solid var(--sage-200); 
-      border-radius: 12px; 
-      width: 38px; 
-      height: 38px; 
-      font-size: 18px; 
+      background: var(--rock-black); 
+      color: var(--rock-red);
+      border: 1.5px solid var(--rock-red); 
+      border-radius: 8px; 
+      width: 42px; 
+      height: 42px; 
+      font-size: 16px; 
       cursor: pointer; 
-      color: var(--sage-700); 
-      backdrop-filter: blur(4px);
+    }
+
+    .date-ctrl button:active {
+      background: var(--rock-red);
+      color: #fff;
     }
   </style>
 </head>
 <body>
 
+  <!-- ELEMENTI MUSICALI DI SFONDO -->
+  <div class="musical-bg-decor">
+    <span>🎸</span><span>🥁</span><span>🎵</span><span>🎶</span><span>🎸</span><span>🥁</span>
+    <span>🎵</span><span>🎶</span><span>🎸</span><span>🥁</span><span>🎵</span><span>🎶</span>
+    <span>🎸</span><span>🥁</span><span>🎵</span><span>🎶</span><span>🎸</span><span>🥁</span>
+  </div>
+
   <header>
     <div>
-      <h1>Lezioni di Musica</h1>
+      <h1>🎸 Lezioni Musica 🥁</h1>
       <p>Registro & Contabilità</p>
     </div>
-    <button onclick="switchTab('options')" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">⚙️</button>
+    <button onclick="switchTab('options')" style="background:var(--rock-black); color:var(--rock-gold); border:1.5px solid var(--rock-gold); border-radius:50%; width:38px; height:38px; font-size:16px; cursor:pointer;">⚙️</button>
   </header>
 
   <div id="toast">Salvato con successo!</div>
@@ -267,7 +356,7 @@
         <label>Seleziona Data</label>
         <div class="date-ctrl">
           <button onclick="changeDate(-1)">❮</button>
-          <input type="date" id="selected-date" onchange="loadDateData()" style="margin-bottom:0; text-align:center; font-weight:bold;">
+          <input type="date" id="selected-date" onchange="loadDateData()" style="margin-bottom:0; text-align:center;">
           <button onclick="changeDate(1)">❯</button>
         </div>
       </div>
@@ -276,7 +365,7 @@
       <div class="card">
         <div class="card-title">
           <span id="child1-name-display">Bambino 1</span>
-          <span id="child1-instrument-display" class="badge">Batteria (€ 22.50)</span>
+          <span id="child1-instrument-display" class="badge">🥁 Batteria (€ 22.50)</span>
         </div>
 
         <label>Stato Lezione</label>
@@ -285,15 +374,15 @@
           <option value="done">🟢 Fatta</option>
           <option value="recover">🟡 Da recuperare</option>
           <option value="paid_not_done">🔴 Pagata ma non fatta</option>
-          <option value="absent_teacher">🟣 Assenza Maestro</option>
-          <option value="absent_student">🟠 Assenza Alunno</option>
+          <option value="maestro_absent">🟣 Assenza Maestro</option>
+          <option value="student_absent">🟠 Assenza Alunno</option>
         </select>
 
         <label>Note</label>
         <input type="text" id="child1-note" placeholder="Note facoltative...">
 
         <button onclick="saveChildData(1)" class="btn">
-          💾 SALVA PER <span id="child1-btn-name">BAMBINO 1</span>
+          💾 SALVA <span id="child1-btn-name">BAMBINO 1</span>
         </button>
       </div>
 
@@ -301,7 +390,7 @@
       <div class="card">
         <div class="card-title">
           <span id="child2-name-display">Bambino 2</span>
-          <span id="child2-instrument-display" class="badge">Chitarra (€ 20.00)</span>
+          <span id="child2-instrument-display" class="badge">🎸 Chitarra (€ 20.00)</span>
         </div>
 
         <label>Stato Lezione</label>
@@ -310,15 +399,15 @@
           <option value="done">🟢 Fatta</option>
           <option value="recover">🟡 Da recuperare</option>
           <option value="paid_not_done">🔴 Pagata ma non fatta</option>
-          <option value="absent_teacher">🟣 Assenza Maestro</option>
-          <option value="absent_student">🟠 Assenza Alunno</option>
+          <option value="maestro_absent">🟣 Assenza Maestro</option>
+          <option value="student_absent">🟠 Assenza Alunno</option>
         </select>
 
         <label>Note</label>
         <input type="text" id="child2-note" placeholder="Note facoltative...">
 
         <button onclick="saveChildData(2)" class="btn">
-          💾 SALVA PER <span id="child2-btn-name">BAMBINO 2</span>
+          💾 SALVA <span id="child2-btn-name">BAMBINO 2</span>
         </button>
       </div>
 
@@ -329,7 +418,7 @@
       
       <div class="card">
         <label>Mese & Anno</label>
-        <input type="month" id="summary-month" onchange="renderSummary()" style="margin-bottom:0; font-weight:bold;">
+        <input type="month" id="summary-month" onchange="renderSummary()" style="margin-bottom:0;">
       </div>
 
       <!-- Report Bambino 1 -->
@@ -337,12 +426,12 @@
         <div class="card-title">
           <div>
             <div id="summary-child1-name">Bambino 1</div>
-            <div id="summary-child1-sub" style="font-size:11px; color:var(--slate-500); font-weight:normal;">Batteria • € 22,50/lez.</div>
+            <div id="summary-child1-sub" style="font-size:11px; color:#aaa;">🥁 Batteria • € 22,50/lez.</div>
           </div>
-          <span id="summary-child1-price-total" style="font-size:18px; font-weight:900; color:var(--sage-700);">€ 0,00</span>
+          <span id="summary-child1-price-total" style="font-size:22px; font-weight:600; color:var(--rock-gold);">€ 0,00</span>
         </div>
 
-        <div class="grid-4">
+        <div class="grid-3">
           <div class="stat-box green">
             <div class="stat-num" id="c1-done">0</div>
             <div class="stat-desc">Fatte</div>
@@ -355,13 +444,15 @@
             <div class="stat-num" id="c1-paid-not-done">0</div>
             <div class="stat-desc">Pagate N.F.</div>
           </div>
+        </div>
+        <div class="grid-3" style="grid-template-columns: 1fr 1fr; margin-top: 6px;">
           <div class="stat-box purple">
-            <div class="stat-num" id="c1-absent-teacher">0</div>
+            <div class="stat-num" id="c1-maestro-absent">0</div>
             <div class="stat-desc">Ass. Maestro</div>
           </div>
-          <div class="stat-box orange" style="grid-column: span 2;">
-            <div class="stat-num" id="c1-absent-student">0</div>
-            <div class="stat-desc">Assenza Alunno</div>
+          <div class="stat-box orange">
+            <div class="stat-num" id="c1-student-absent">0</div>
+            <div class="stat-desc">Ass. Alunno</div>
           </div>
         </div>
       </div>
@@ -371,12 +462,12 @@
         <div class="card-title">
           <div>
             <div id="summary-child2-name">Bambino 2</div>
-            <div id="summary-child2-sub" style="font-size:11px; color:var(--slate-500); font-weight:normal;">Chitarra • € 20,00/lez.</div>
+            <div id="summary-child2-sub" style="font-size:11px; color:#aaa;">🎸 Chitarra • € 20,00/lez.</div>
           </div>
-          <span id="summary-child2-price-total" style="font-size:18px; font-weight:900; color:var(--sage-700);">€ 0,00</span>
+          <span id="summary-child2-price-total" style="font-size:22px; font-weight:600; color:var(--rock-gold);">€ 0,00</span>
         </div>
 
-        <div class="grid-4">
+        <div class="grid-3">
           <div class="stat-box green">
             <div class="stat-num" id="c2-done">0</div>
             <div class="stat-desc">Fatte</div>
@@ -389,13 +480,15 @@
             <div class="stat-num" id="c2-paid-not-done">0</div>
             <div class="stat-desc">Pagate N.F.</div>
           </div>
+        </div>
+        <div class="grid-3" style="grid-template-columns: 1fr 1fr; margin-top: 6px;">
           <div class="stat-box purple">
-            <div class="stat-num" id="c2-absent-teacher">0</div>
+            <div class="stat-num" id="c2-maestro-absent">0</div>
             <div class="stat-desc">Ass. Maestro</div>
           </div>
-          <div class="stat-box orange" style="grid-column: span 2;">
-            <div class="stat-num" id="c2-absent-student">0</div>
-            <div class="stat-desc">Assenza Alunno</div>
+          <div class="stat-box orange">
+            <div class="stat-num" id="c2-student-absent">0</div>
+            <div class="stat-desc">Ass. Alunno</div>
           </div>
         </div>
       </div>
@@ -403,8 +496,8 @@
       <!-- Totale Complessivo Mensile -->
       <div class="total-banner">
         <div>
-          <div style="font-size:11px; opacity:0.85; text-transform:uppercase; font-weight:600;">Totale Mese</div>
-          <div style="font-size:12px; opacity:0.95;">Somma lezioni fatte e pagate</div>
+          <div style="font-size:11px; text-transform:uppercase;">Totale Mese</div>
+          <div style="font-size:10px; opacity:0.8;">Somma lezioni fatte e pagate</div>
         </div>
         <div id="grand-total-price" class="total-amount">€ 0,00</div>
       </div>
@@ -412,7 +505,21 @@
       <!-- Lista Dettagliata Mensile -->
       <div class="card">
         <label>Dettaglio Giornaliero</label>
-        <div id="monthly-history-list" style="max-height:200px; overflow-y:auto; font-size:12px;">
+        <div id="monthly-history-list" style="max-height:200px; overflow-y:auto; font-size:13px;">
+          <!-- Popolato via JS -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TAB 4: RIEPILOGO PAGAMENTI OGNI 4 LEZIONI -->
+    <section id="tab-blocks" class="hidden">
+      
+      <div class="card">
+        <div class="card-title">Blocchi da 4 Lezioni</div>
+        <p style="font-size:11px; color:#aaa; margin-bottom:12px;">Riepilogo dei cicli di 4 lezioni (fatte o pagate) per ciascun bambino con calcolo del totale.</p>
+        
+        <div id="blocks-container">
           <!-- Popolato via JS -->
         </div>
       </div>
@@ -422,7 +529,7 @@
     <!-- TAB 3: OPZIONI / CONFIGURAZIONE -->
     <section id="tab-options" class="hidden">
       <div class="card">
-        <div class="card-title" style="border-bottom:1px solid rgba(220, 235, 208, 0.6); padding-bottom:8px;">Configurazione Bambini & Prezzi</div>
+        <div class="card-title" style="border-bottom:1.5px solid var(--rock-border); padding-bottom:8px;">Configurazione Bambini & Prezzi</div>
 
         <!-- Bambino 1 -->
         <div style="margin-top:12px;">
@@ -440,7 +547,7 @@
           </div>
         </div>
 
-        <hr style="border:none; border-top:1px solid rgba(220, 235, 208, 0.6); margin:12px 0;">
+        <hr style="border:none; border-top:1px dashed var(--rock-border); margin:12px 0;">
 
         <!-- Bambino 2 -->
         <div>
@@ -459,37 +566,30 @@
         </div>
 
         <button onclick="saveSettings()" class="btn" style="margin-top:8px;">
-          Salva Impostazioni
+          💾 SALVA IMPOSTAZIONI
         </button>
       </div>
 
       <div class="card">
-        <label>Esportazione Excel</label>
-        <p style="font-size:11px; color:var(--slate-500); margin-bottom:12px;">Scarica i dati registrati in formato Excel (.xlsx) diviso con un foglio per ogni mese.</p>
+        <label>Esportazione & Backup Dati</label>
+        <p style="font-size:11px; margin-bottom:12px; color:#aaa;">Esporta i dati in formato Excel o trasferisci il backup su altri dispositivi.</p>
         
-        <button onclick="exportToExcel()" class="btn btn-excel">
-          📊 ESPORTA IN FOGLIO EXCEL (.XLSX)
+        <button onclick="exportToExcel()" class="btn btn-excel" style="margin-bottom:10px;">
+          📊 ESPORTA IN EXCEL (.XLSX)
         </button>
-      </div>
 
-      <div class="card">
-        <label>Backup & Trasferimento Dati</label>
-        <p style="font-size:11px; color:var(--slate-500); margin-bottom:12px;">Salva una copia completa dei dati o carica un backup per sincronizzare un altro dispositivo.</p>
-        
-        <div style="display:flex; flex-direction:column; gap:8px;">
-          <button onclick="exportData()" class="btn btn-secondary" style="font-size:13px;">
-            💾 Crea Backup (Scarica file .json)
-          </button>
-          
-          <button onclick="document.getElementById('import-file-input').click()" class="btn btn-blue" style="font-size:13px;">
-            📂 Ripristina / Carica Backup da Altro Dispositivo
-          </button>
-          <input type="file" id="import-file-input" accept=".json" style="display:none;" onchange="importData(event)">
+        <button onclick="exportData()" class="btn btn-secondary" style="margin-bottom:10px;">
+          ⬇️ CREA BACKUP (SCARICA .JSON)
+        </button>
 
-          <hr style="border:none; border-top:1px solid rgba(220, 235, 208, 0.6); margin:8px 0;">
+        <label class="btn btn-pink" style="cursor:pointer; margin-bottom:10px; text-align:center;">
+          ⬆️ RIPRISTINA BACKUP (.JSON)
+          <input type="file" id="import-file" accept=".json" onchange="importData(event)" style="display:none;">
+        </label>
 
-          <button onclick="clearData()" class="btn btn-danger" style="font-size:12px;">Cancella Tutti i Dati</button>
-        </div>
+        <button onclick="clearData()" class="btn btn-danger">
+          🗑️ CANCELLA TUTTI I DATI
+        </button>
       </div>
     </section>
 
@@ -499,15 +599,19 @@
     <div class="nav-container">
       <button onclick="switchTab('register')" id="nav-register" class="nav-btn active">
         <span style="font-size:16px;">📅</span>
-        <span>Registro</span>
+        <span>REGISTRO</span>
       </button>
       <button onclick="switchTab('summary')" id="nav-summary" class="nav-btn">
         <span style="font-size:16px;">📊</span>
-        <span>Riepilogo</span>
+        <span>RIEPILOGO</span>
+      </button>
+      <button onclick="switchTab('blocks')" id="nav-blocks" class="nav-btn">
+        <span style="font-size:16px;">💰</span>
+        <span>RIEPIG. 4 LEZ.</span>
       </button>
       <button onclick="switchTab('options')" id="nav-options" class="nav-btn">
         <span style="font-size:16px;">⚙️</span>
-        <span>Opzioni</span>
+        <span>OPZIONI</span>
       </button>
     </div>
   </nav>
@@ -545,15 +649,16 @@
       if (activeNav) activeNav.classList.add('active');
 
       if (tabId === 'summary') renderSummary();
+      if (tabId === 'blocks') renderBlocks();
     }
 
     function applyConfig() {
       document.getElementById('child1-name-display').innerText = config.child1.name;
-      document.getElementById('child1-instrument-display').innerText = `${config.child1.instrument} (€ ${config.child1.price.toFixed(2)})`;
+      document.getElementById('child1-instrument-display').innerText = `🥁 ${config.child1.instrument} (€ ${config.child1.price.toFixed(2)})`;
       document.getElementById('child1-btn-name').innerText = config.child1.name.toUpperCase();
 
       document.getElementById('child2-name-display').innerText = config.child2.name;
-      document.getElementById('child2-instrument-display').innerText = `${config.child2.instrument} (€ ${config.child2.price.toFixed(2)})`;
+      document.getElementById('child2-instrument-display').innerText = `🎸 ${config.child2.instrument} (€ ${config.child2.price.toFixed(2)})`;
       document.getElementById('child2-btn-name').innerText = config.child2.name.toUpperCase();
 
       document.getElementById('cfg-child1-name').value = config.child1.name;
@@ -605,13 +710,13 @@
       if (!monthStr) return;
 
       document.getElementById('summary-child1-name').innerText = config.child1.name;
-      document.getElementById('summary-child1-sub').innerText = `${config.child1.instrument} • € ${config.child1.price.toFixed(2)}/lez.`;
+      document.getElementById('summary-child1-sub').innerText = `🥁 ${config.child1.instrument} • € ${config.child1.price.toFixed(2)}/lez.`;
 
       document.getElementById('summary-child2-name').innerText = config.child2.name;
-      document.getElementById('summary-child2-sub').innerText = `${config.child2.instrument} • € ${config.child2.price.toFixed(2)}/lez.`;
+      document.getElementById('summary-child2-sub').innerText = `🎸 ${config.child2.instrument} • € ${config.child2.price.toFixed(2)}/lez.`;
 
-      let c1 = { done: 0, recover: 0, paidNotDone: 0, absentTeacher: 0, absentStudent: 0 };
-      let c2 = { done: 0, recover: 0, paidNotDone: 0, absentTeacher: 0, absentStudent: 0 };
+      let c1 = { done: 0, recover: 0, paidNotDone: 0, maestroAbsent: 0, studentAbsent: 0 };
+      let c2 = { done: 0, recover: 0, paidNotDone: 0, maestroAbsent: 0, studentAbsent: 0 };
 
       let historyHtml = '';
 
@@ -623,28 +728,28 @@
             if (entry.child1.status === 'done') c1.done++;
             if (entry.child1.status === 'recover') c1.recover++;
             if (entry.child1.status === 'paid_not_done') c1.paidNotDone++;
-            if (entry.child1.status === 'absent_teacher') c1.absentTeacher++;
-            if (entry.child1.status === 'absent_student') c1.absentStudent++;
+            if (entry.child1.status === 'maestro_absent') c1.maestroAbsent++;
+            if (entry.child1.status === 'student_absent') c1.studentAbsent++;
           }
 
           if (entry.child2) {
             if (entry.child2.status === 'done') c2.done++;
             if (entry.child2.status === 'recover') c2.recover++;
             if (entry.child2.status === 'paid_not_done') c2.paidNotDone++;
-            if (entry.child2.status === 'absent_teacher') c2.absentTeacher++;
-            if (entry.child2.status === 'absent_student') c2.absentStudent++;
+            if (entry.child2.status === 'maestro_absent') c2.maestroAbsent++;
+            if (entry.child2.status === 'student_absent') c2.studentAbsent++;
           }
 
           if ((entry.child1 && entry.child1.status !== 'none') || (entry.child2 && entry.child2.status !== 'none')) {
             const formattedDate = date.split('-').reverse().join('/');
-            historyHtml += `<div style="padding:8px 0; border-bottom:1px solid rgba(220, 235, 208, 0.6);">
-              <strong style="color:var(--slate-800);">${formattedDate}</strong>`;
+            historyHtml += `<div style="padding:8px 0; border-bottom:1px solid #333;">
+              <span style="color:var(--rock-gold);">${formattedDate}</span>`;
             
             if (entry.child1 && entry.child1.status !== 'none') {
-              historyHtml += `<div style="display:flex; justify-content:space-between; color:var(--slate-500);"><span>${config.child1.name}:</span> <span>${getStatusLabel(entry.child1.status)}</span></div>`;
+              historyHtml += `<div style="display:flex; justify-content:space-between;"><span>${config.child1.name}:</span> <span>${getStatusLabel(entry.child1.status)}</span></div>`;
             }
             if (entry.child2 && entry.child2.status !== 'none') {
-              historyHtml += `<div style="display:flex; justify-content:space-between; color:var(--slate-500);"><span>${config.child2.name}:</span> <span>${getStatusLabel(entry.child2.status)}</span></div>`;
+              historyHtml += `<div style="display:flex; justify-content:space-between;"><span>${config.child2.name}:</span> <span>${getStatusLabel(entry.child2.status)}</span></div>`;
             }
             historyHtml += `</div>`;
           }
@@ -654,14 +759,14 @@
       document.getElementById('c1-done').innerText = c1.done;
       document.getElementById('c1-recover').innerText = c1.recover;
       document.getElementById('c1-paid-not-done').innerText = c1.paidNotDone;
-      document.getElementById('c1-absent-teacher').innerText = c1.absentTeacher;
-      document.getElementById('c1-absent-student').innerText = c1.absentStudent;
+      document.getElementById('c1-maestro-absent').innerText = c1.maestroAbsent;
+      document.getElementById('c1-student-absent').innerText = c1.studentAbsent;
 
       document.getElementById('c2-done').innerText = c2.done;
       document.getElementById('c2-recover').innerText = c2.recover;
       document.getElementById('c2-paid-not-done').innerText = c2.paidNotDone;
-      document.getElementById('c2-absent-teacher').innerText = c2.absentTeacher;
-      document.getElementById('c2-absent-student').innerText = c2.absentStudent;
+      document.getElementById('c2-maestro-absent').innerText = c2.maestroAbsent;
+      document.getElementById('c2-student-absent').innerText = c2.studentAbsent;
 
       const c1TotalCount = c1.done + c1.paidNotDone;
       const c1PriceTotal = c1TotalCount * config.child1.price;
@@ -674,7 +779,87 @@
       const grandTotal = c1PriceTotal + c2PriceTotal;
       document.getElementById('grand-total-price').innerText = `€ ${grandTotal.toFixed(2)}`;
 
-      document.getElementById('monthly-history-list').innerHTML = historyHtml || `<p style="color:var(--slate-500); font-style:italic;">Nessuna lezione registrata per questo mese.</p>`;
+      document.getElementById('monthly-history-list').innerHTML = historyHtml || `<p style="color:#666; font-style:italic;">Nessuna lezione registrata per questo mese.</p>`;
+    }
+
+    let blockPayments = JSON.parse(localStorage.getItem('music_app_block_payments') || '{}');
+
+    function saveBlockPayment(childKey, blockId, field, value) {
+      if (!blockPayments[childKey]) blockPayments[childKey] = {};
+      if (!blockPayments[childKey][blockId]) blockPayments[childKey][blockId] = {};
+      blockPayments[childKey][blockId][field] = value;
+      localStorage.setItem('music_app_block_payments', JSON.stringify(blockPayments));
+      renderBlocks();
+    }
+
+    function renderBlocks() {
+      const allDates = Object.keys(entries).sort();
+      let c1List = [], c2List = [];
+      allDates.forEach(date => {
+        const entry = entries[date];
+        if (entry.child1 && ['done','paid_not_done'].includes(entry.child1.status))
+          c1List.push({date, status: entry.child1.status});
+        if (entry.child2 && ['done','paid_not_done'].includes(entry.child2.status))
+          c2List.push({date, status: entry.child2.status});
+      });
+      document.getElementById('blocks-container').innerHTML =
+        buildChildBlocksHtml('child1', config.child1.name, config.child1.instrument, config.child1.price, c1List) +
+        `<hr style="border:none;border-top:1px dashed var(--rock-border);margin:16px 0;">` +
+        buildChildBlocksHtml('child2', config.child2.name, config.child2.instrument, config.child2.price, c2List);
+    }
+
+    function buildChildBlocksHtml(childKey, childName, instrument, pricePerLesson, list) {
+      if (!list.length) return `<div style="margin-bottom:12px;">
+        <div style="font-weight:600;color:var(--rock-gold);">${childName} (${instrument})</div>
+        <p style="font-size:12px;color:#777;font-style:italic;margin-top:4px;">Nessuna lezione conteggiabile.</p></div>`;
+      let res = `<div style="margin-bottom:12px;"><div style="font-weight:600;color:var(--rock-gold);margin-bottom:8px;">${childName} (${instrument})</div>`;
+      let pendingCredits = [];
+      for (let i = 0, blockIndex = 1; i < list.length; i += 4, blockIndex++) {
+        const chunk = list.slice(i, i + 4);
+        const blockId = chunk[0].date;
+        const payment = (blockPayments[childKey] || {})[blockId] || {};
+        const baseTotal = 4 * Number(pricePerLesson || 0);
+        const carryCredits = pendingCredits.slice();
+        const creditTotal = carryCredits.reduce((sum, item) => sum + item.amount, 0);
+        pendingCredits = [];
+        const due = Math.max(0, baseTotal - creditTotal);
+        const paid = payment.paid === true || payment.paid === 'true';
+        const safeId = `${childKey}-${blockId}`.replace(/[^a-zA-Z0-9_-]/g,'');
+        res += `<div style="background:var(--rock-black);border:1px solid ${paid?'var(--rock-green)':'var(--rock-border)'};border-radius:8px;padding:10px;margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--rock-cyan);">
+            <span>Blocco ${blockIndex} (${chunk.length}/4 lezioni)</span><span style="color:var(--rock-gold);">€ ${baseTotal.toFixed(2)}</span>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;color:${paid?'var(--rock-green)':'var(--rock-text)'};font-size:13px;text-transform:none;">
+            <input type="checkbox" style="width:20px;height:20px;margin:0;" ${paid?'checked':''}
+              onchange="saveBlockPayment('${childKey}','${blockId}','paid',this.checked)">
+            ${paid?'✅ Blocco pagato':'☐ Segna le 4 lezioni come pagate'}
+            <span style="margin-left:auto;color:var(--rock-gold);font-weight:700;white-space:nowrap;">€ ${baseTotal.toFixed(2)} / 4 lezioni</span>
+          </label>
+          <label style="margin-top:10px;">Data pagamento</label>
+          <input type="date" value="${payment.date || ''}" onchange="saveBlockPayment('${childKey}','${blockId}','date',this.value)" style="margin-bottom:8px;">
+          <div style="font-size:12px;color:#ccc;margin-bottom:8px;">Importo del blocco: <b>€ ${baseTotal.toFixed(2)}</b>
+            ${paid && payment.date ? ` • Pagato il ${payment.date.split('-').reverse().join('/')}` : ''}
+          </div>
+          <div style="font-size:12px;display:flex;flex-direction:column;gap:5px;">`;
+        chunk.forEach(item => {
+          const formattedDate = item.date.split('-').reverse().join('/');
+          res += `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding-bottom:4px;">
+            <span style="color:#ccc;">📅 ${formattedDate}</span><span>${getStatusLabel(item.status)}</span></div>`;
+          if (item.status === 'paid_not_done') pendingCredits.push({date:item.date, amount:pricePerLesson});
+        });
+        if (carryCredits.length) {
+          res += `<div style="margin-top:8px;padding:8px;border:1px solid var(--rock-orange);border-radius:6px;color:var(--rock-orange);">
+            <b>↪ Da recuperare nelle prossime 4 lezioni</b>`;
+          carryCredits.forEach(item => {
+            res += `<div style="display:flex;justify-content:space-between;margin-top:4px;"><span>${item.date.split('-').reverse().join('/')} • lezione pagata non fatta</span><b>− € ${item.amount.toFixed(2)}</b></div>`;
+          });
+          res += `<div style="border-top:1px solid var(--rock-orange);margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;"><b>Credito da scalare</b><b>− € ${creditTotal.toFixed(2)}</b></div>
+            <div style="display:flex;justify-content:space-between;margin-top:4px;color:var(--rock-gold);"><b>Importo netto del blocco</b><b>€ ${due.toFixed(2)}</b></div></div>`;
+        }
+        res += `</div></div>`;
+      }
+      res += `</div>`;
+      return res;
     }
 
     function getStatusLabel(status) {
@@ -682,20 +867,9 @@
         case 'done': return '🟢 Fatta';
         case 'recover': return '🟡 Da recuperare';
         case 'paid_not_done': return '🔴 Pagata non fatta';
-        case 'absent_teacher': return '🟣 Assenza Maestro';
-        case 'absent_student': return '🟠 Assenza Alunno';
+        case 'maestro_absent': return '🟣 Assenza Maestro';
+        case 'student_absent': return '🟠 Assenza Alunno';
         default: return '⚪ Non prevista';
-      }
-    }
-
-    function getStatusText(status) {
-      switch(status) {
-        case 'done': return 'Fatta';
-        case 'recover': return 'Da recuperare';
-        case 'paid_not_done': return 'Pagata ma non fatta';
-        case 'absent_teacher': return 'Assenza Maestro';
-        case 'absent_student': return 'Assenza Alunno';
-        default: return 'Non prevista';
       }
     }
 
@@ -737,8 +911,8 @@
       Object.keys(monthsMap).sort().forEach(monthKey => {
         const sheetData = [];
         
-        let c1Done = 0, c1PaidNotDone = 0, c1Recover = 0, c1AbsTeacher = 0, c1AbsStudent = 0;
-        let c2Done = 0, c2PaidNotDone = 0, c2Recover = 0, c2AbsTeacher = 0, c2AbsStudent = 0;
+        let c1Done = 0, c1PaidNotDone = 0, c1Recover = 0, c1MaestroAbs = 0, c1StudentAbs = 0;
+        let c2Done = 0, c2PaidNotDone = 0, c2Recover = 0, c2MaestroAbs = 0, c2StudentAbs = 0;
 
         monthsMap[monthKey].forEach(date => {
           const entry = entries[date];
@@ -746,15 +920,15 @@
             if (entry.child1.status === 'done') c1Done++;
             if (entry.child1.status === 'paid_not_done') c1PaidNotDone++;
             if (entry.child1.status === 'recover') c1Recover++;
-            if (entry.child1.status === 'absent_teacher') c1AbsTeacher++;
-            if (entry.child1.status === 'absent_student') c1AbsStudent++;
+            if (entry.child1.status === 'maestro_absent') c1MaestroAbs++;
+            if (entry.child1.status === 'student_absent') c1StudentAbs++;
           }
           if (entry.child2) {
             if (entry.child2.status === 'done') c2Done++;
             if (entry.child2.status === 'paid_not_done') c2PaidNotDone++;
             if (entry.child2.status === 'recover') c2Recover++;
-            if (entry.child2.status === 'absent_teacher') c2AbsTeacher++;
-            if (entry.child2.status === 'absent_student') c2AbsStudent++;
+            if (entry.child2.status === 'maestro_absent') c2MaestroAbs++;
+            if (entry.child2.status === 'student_absent') c2StudentAbs++;
           }
         });
 
@@ -769,10 +943,10 @@
         sheetData.push([`RIEPILOGO LEZIONI MUSICA - MESE ${monthKey}`]);
         sheetData.push([]);
         sheetData.push([`Bambino 1: ${config.child1.name} (${config.child1.instrument})`, `€ ${config.child1.price.toFixed(2)} / lezione`]);
-        sheetData.push([`Lezioni Fatte: ${c1Done}`, `Da Recuperare: ${c1Recover}`, `Pagate N.F.: ${c1PaidNotDone}`, `Ass. Maestro: ${c1AbsTeacher}`, `Ass. Alunno: ${c1AbsStudent}`, `Totale Dovuto: € ${c1Cost.toFixed(2)}`]);
+        sheetData.push([`Fatte: ${c1Done}`, `Recuperi: ${c1Recover}`, `Pagate N.F.: ${c1PaidNotDone}`, `Ass. Maestro: ${c1MaestroAbs}`, `Ass. Alunno: ${c1StudentAbs}`, `Totale: € ${c1Cost.toFixed(2)}`]);
         sheetData.push([]);
         sheetData.push([`Bambino 2: ${config.child2.name} (${config.child2.instrument})`, `€ ${config.child2.price.toFixed(2)} / lezione`]);
-        sheetData.push([`Lezioni Fatte: ${c2Done}`, `Da Recuperare: ${c2Recover}`, `Pagate N.F.: ${c2PaidNotDone}`, `Ass. Maestro: ${c2AbsTeacher}`, `Ass. Alunno: ${c2AbsStudent}`, `Totale Dovuto: € ${c2Cost.toFixed(2)}`]);
+        sheetData.push([`Fatte: ${c2Done}`, `Recuperi: ${c2Recover}`, `Pagate N.F.: ${c2PaidNotDone}`, `Ass. Maestro: ${c2MaestroAbs}`, `Ass. Alunno: ${c2StudentAbs}`, `Totale: € ${c2Cost.toFixed(2)}`]);
         sheetData.push([]);
         sheetData.push([`TOTALE COMPLESSIVO MESE: € ${totalMonthCost.toFixed(2)}`]);
         sheetData.push([]);
@@ -799,15 +973,25 @@
       showToast("File Excel generato!");
     }
 
+    function getStatusText(status) {
+      switch(status) {
+        case 'done': return 'Fatta';
+        case 'recover': return 'Da recuperare';
+        case 'paid_not_done': return 'Pagata ma non fatta';
+        case 'maestro_absent': return 'Assenza Maestro';
+        case 'student_absent': return 'Assenza Alunno';
+        default: return 'Non prevista';
+      }
+    }
+
     function exportData() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ config, entries }));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `backup_lezioni_musica_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `backup_lezioni_musica.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
-      showToast("Backup scaricato!");
     }
 
     function importData(event) {
@@ -817,24 +1001,23 @@
       const reader = new FileReader();
       reader.onload = function(e) {
         try {
-          const imported = JSON.parse(e.target.result);
-          if (imported.config && imported.entries) {
-            config = imported.config;
-            entries = imported.entries;
-            localStorage.setItem('music_app_config', JSON.stringify(config));
-            localStorage.setItem('music_app_entries', JSON.stringify(entries));
+          const importedData = JSON.parse(e.target.result);
+          if (importedData.config && importedData.entries) {
+            localStorage.setItem('music_app_config', JSON.stringify(importedData.config));
+            localStorage.setItem('music_app_entries', JSON.stringify(importedData.entries));
+            config = importedData.config;
+            entries = importedData.entries;
             applyConfig();
             loadDateData();
-            showToast("Dati ripristinati con successo!");
+            showToast("Backup ripristinato!");
           } else {
-            alert("Il file caricato non sembra essere un backup valido di questa app.");
+            alert("File di backup non valido.");
           }
         } catch (err) {
-          alert("Errore nella lettura del file di backup.");
+          alert("Errore durante la lettura del file.");
         }
       };
       reader.readAsText(file);
-      event.target.value = '';
     }
 
     function clearData() {
@@ -846,5 +1029,7 @@
       }
     }
   </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4bc70e2c01a94c73b74392e4234840661791215815920" integrity="sha512-L0ha0OXavK/8okipN9F8BtP84dg9DUhPERbBXzwI6dgTA55d2+yweo3pn5CSFYs45/r8md2+xvUPtTdvTNRfjA==" data-cf-beacon='{"version":"2024.11.0","token":"480c9d8468c44ad3bed3c74fbcc6d6f3","r":1,"spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4bc70e2c01a94c73b74392e4234840661791215815920" integrity="sha512-L0ha0OXavK/8okipN9F8BtP84dg9DUhPERbBXzwI6dgTA55d2+yweo3pn5CSFYs45/r8md2+xvUPtTdvTNRfjA==" data-cf-beacon='{"version":"2024.11.0","token":"480c9d8468c44ad3bed3c74fbcc6d6f3","r":1,"spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
