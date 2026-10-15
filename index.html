@@ -870,6 +870,7 @@ Released under the MIT license: http://jsbin.mit-license.org
             if(response.error){googleStatus('Accesso Google non riuscito: '+response.error);return;}
             googleAccessToken=response.access_token;
             document.getElementById('googleSignInBtn').classList.add('hidden');
+            document.getElementById('googleEditBtn').classList.add('hidden');
             googleStatus('Accesso riuscito. Sincronizzazione iniziale…');
             await startMusicSync();
           },
@@ -967,6 +968,7 @@ Released under the MIT license: http://jsbin.mit-license.org
       if(googleAccessToken&&window.google?.accounts?.oauth2)window.google.accounts.oauth2.revoke(googleAccessToken,()=>{});
       googleAccessToken=null;googleTokenClient=null;
       document.getElementById('googleSignInBtn').classList.remove('hidden');
+      if(localStorage.getItem('music_google_client_id'))document.getElementById('googleEditBtn').classList.remove('hidden');
       googleStatus('Disconnesso. I dati locali restano disponibili.');
     }
     window.addEventListener('online',()=>{if(googleAccessToken)syncMusicFromCloud();});
