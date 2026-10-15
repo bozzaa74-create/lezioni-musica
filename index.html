@@ -813,12 +813,16 @@ Released under the MIT license: http://jsbin.mit-license.org
 
     let blockPayments = JSON.parse(localStorage.getItem('music_app_block_payments') || '{}');
     let googleTokenClient = null, googleAccessToken = null, googlePollTimer = null, googleSyncTimer = null;
-    let googleLastCloudModified = '', googleSyncBusy = false, googleLastLocalEdit = Number(localStorage.getItem('music_app_local_edit') || 0);
+    let googleLastCloudModified = '', googleSyncBusy = false, googleBackupQueued = false;
+    let googleLastLocalEdit = Number(localStorage.getItem('music_app_local_edit') || 0);
     const googleDataFileName = 'registro-lezioni-musica-backup.json';
     function markMusicEdited() {
       googleLastLocalEdit = Date.now();
       localStorage.setItem('music_app_local_edit', String(googleLastLocalEdit));
-      if (googleAccessToken) { clearTimeout(googleSyncTimer); googleSyncTimer = setTimeout(() => driveBackup(true), 1200); }
+      if (googleAccessToken) {
+        clearTimeout(googleSyncTimer);
+        googleSyncTimer = setTimeout(() => driveBackup(true), 900);
+      }
     }
     function musicSnapshot() { return { format:'registro-lezioni-musica', version:1, updatedAt:new Date().toISOString(), config, entries, blockPayments }; }
     function applyMusicSnapshot(data, modifiedTime, quiet=false) {
@@ -901,9 +905,12 @@ Released under the MIT license: http://jsbin.mit-license.org
     async function musicApi(url, options={}) {
       if(!googleAccessToken)throw new Error('Accedi prima a Google.');
       const response=await fetch(url,{...options,headers:{Authorization:'Bearer '+googleAccessToken,...(options.headers||{})}});
-      if(response.status===401){googleAccessToken=null;throw new Error('Sessione scaduta: accedi di nuovo.');}
-      if(!response.ok)throw new Error('Google Drive ha restituito errore ('+response.status+').');
-      return response.status===204?null:response.json();
+      const raw=await response.text();
+      let data=null;
+      try { data=raw?JSON.parse(raw):null; } catch (_) { data=null; }
+      if(response.status===401){googleAccessToken=null;throw new Error('Sessione Google scaduta. Premi Accedi con Google e riprova.');}
+      if(!response.ok){const detail=data?.error?.message||raw||response.statusText;throw new Error('Google Drive ('+response.status+'): '+detail);}
+      return data;
     }
     async function findMusicDriveFile() {
       const q=encodeURIComponent("name='"+googleDataFileName+"' and 'appDataFolder' in parents and trashed=false");
@@ -911,21 +918,32 @@ Released under the MIT license: http://jsbin.mit-license.org
       return result.files?.[0]||null;
     }
     async function driveBackup(silent=false) {
-      if(!googleAccessToken){if(!silent)googleStatus('Premi prima Accedi con Google.');return;}
-      if(googleSyncBusy)return;googleSyncBusy=true;
+      if(!googleAccessToken){if(!silent)googleStatus('Premi prima Accedi con Google.');return false;}
+      if(googleSyncBusy){googleBackupQueued=true;return false;}
+      googleSyncBusy=true;
+      let succeeded=false;
       try {
-        if(!silent)googleStatus('Backup su Google Drive in corso…');
+        if(!silent)googleStatus('Caricamento dei dati su Google Drive…');
         const file=await findMusicDriveFile(), stamp=new Date().toISOString();
         const snapshot=musicSnapshot();snapshot.updatedAt=stamp;
-        const boundary='music_boundary_'+Date.now();
+        const boundary='music_boundary_'+Date.now()+'_'+Math.random().toString(16).slice(2);
         const metadata={name:googleDataFileName,mimeType:'application/json',...(file?{}:{parents:['appDataFolder']})};
-        const url=file?'https://www.googleapis.com/upload/drive/v3/files/'+file.id+'?uploadType=multipart':'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
-        const response=await fetch(url,{method:file?'PATCH':'POST',headers:{Authorization:'Bearer '+googleAccessToken,'Content-Type':'multipart/related; boundary='+boundary},body:'--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(metadata)+'\r\n--'+boundary+'\r\nContent-Type: application/json\r\n\r\n'+JSON.stringify(snapshot)+'\r\n--'+boundary+'--'});
-        if(!response.ok)throw new Error('Backup non riuscito ('+response.status+').');
-        const result=await response.json();googleLastCloudModified=result.modifiedTime||stamp;
-        if(!silent)googleStatus('Backup aggiornato alle '+new Date().toLocaleTimeString('it-IT')+'.');
-      } catch(e){if(!silent)googleStatus('Errore backup: '+e.message);}
-      finally{googleSyncBusy=false;}
+        const url=file?'https://www.googleapis.com/upload/drive/v3/files/'+encodeURIComponent(file.id)+'?uploadType=multipart&fields=id,name,modifiedTime':'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,modifiedTime';
+        const body='--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(metadata)+'\r\n--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(snapshot)+'\r\n--'+boundary+'--';
+        const response=await fetch(url,{method:file?'PATCH':'POST',headers:{Authorization:'Bearer '+googleAccessToken,'Content-Type':'multipart/related; boundary='+boundary},body});
+        const raw=await response.text(); let result=null; try{result=raw?JSON.parse(raw):null;}catch(_){result=null;}
+        if(!response.ok)throw new Error('Google Drive ('+response.status+'): '+(result?.error?.message||raw||response.statusText));
+        googleLastCloudModified=result?.modifiedTime||stamp;
+        googleLastLocalEdit=0;localStorage.setItem('music_app_local_edit','0');
+        succeeded=true;
+        googleStatus('☁️ Sincronizzato su Google Drive alle '+new Date().toLocaleTimeString('it-IT')+'.');
+      } catch(e) {
+        googleStatus('Errore sincronizzazione cloud: '+e.message);
+      } finally {
+        googleSyncBusy=false;
+        if(googleBackupQueued){googleBackupQueued=false;if(googleAccessToken&&googleLastLocalEdit){clearTimeout(googleSyncTimer);googleSyncTimer=setTimeout(()=>driveBackup(true),500);}}
+      }
+      return succeeded;
     }
     async function driveRestore() {
       try {
@@ -940,21 +958,40 @@ Released under the MIT license: http://jsbin.mit-license.org
     async function syncMusicFromCloud() {
       if(!googleAccessToken||googleSyncBusy||document.hidden)return;
       try {
-        const file=await findMusicDriveFile();if(!file)return;
-        if(file.modifiedTime&&file.modifiedTime===googleLastCloudModified)return;
-        const data=await musicApi('https://www.googleapis.com/drive/v3/files/'+file.id+'?alt=media');
+        const file=await findMusicDriveFile();
+        if(!file){await driveBackup(true);return;}
+        // Se ci sono modifiche locali non ancora caricate, caricale prima di confrontare
+        // modifiedTime: il file cloud potrebbe essere invariato proprio perché il backup è fallito.
+        if(googleLastLocalEdit){await driveBackup(true);return;}
+        if(file.modifiedTime&&file.modifiedTime===googleLastCloudModified){
+          googleStatus('☁️ Connesso · dati già sincronizzati · '+new Date().toLocaleTimeString('it-IT'));
+          return;
+        }
+        const data=await musicApi('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(file.id)+'?alt=media');
         const cloudTime=Date.parse(data.updatedAt||file.modifiedTime||0);
         if(googleLastLocalEdit&&googleLastLocalEdit>cloudTime){await driveBackup(true);return;}
         applyMusicSnapshot(data,file.modifiedTime,true);
-        googleStatus('Sincronizzazione attiva · ultimo controllo '+new Date().toLocaleTimeString('it-IT'));
-      } catch(e){googleStatus('Sincronizzazione: '+e.message);}
+        googleStatus('☁️ Dati aggiornati da Google Drive · '+new Date().toLocaleTimeString('it-IT'));
+      } catch(e){googleStatus('Errore sincronizzazione cloud: '+e.message);}
     }
     async function startMusicSync() {
       try {
+        googleStatus('Verifico i dati locali e Google Drive…');
         const file=await findMusicDriveFile();
-        if(file){const data=await musicApi('https://www.googleapis.com/drive/v3/files/'+file.id+'?alt=media');applyMusicSnapshot(data,file.modifiedTime,true);googleStatus('Dati caricati da Google Drive. Controllo automatico ogni 5 secondi.');}
-        else {await driveBackup(true);googleStatus('Creato il primo backup su Drive. Controllo automatico ogni 5 secondi.');}
-      } catch(e){googleStatus('Sincronizzazione iniziale: '+e.message);}
+        if(file){
+          const data=await musicApi('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(file.id)+'?alt=media');
+          if(googleLastLocalEdit){
+            const ok=await driveBackup(true);
+            if(ok)googleStatus('☁️ Modifiche locali caricate su Google Drive.');
+          } else {
+            applyMusicSnapshot(data,file.modifiedTime,true);
+            googleStatus('☁️ Dati scaricati da Google Drive. Sincronizzazione automatica attiva.');
+          }
+        } else {
+          const ok=await driveBackup(true);
+          if(ok)googleStatus('☁️ Primo backup creato su Google Drive. Sincronizzazione automatica attiva.');
+        }
+      } catch(e){googleStatus('Errore sincronizzazione iniziale: '+e.message);}
       if(googlePollTimer)clearInterval(googlePollTimer);
       if(document.getElementById('googleAutoSync').checked)googlePollTimer=setInterval(syncMusicFromCloud,5000);
     }
