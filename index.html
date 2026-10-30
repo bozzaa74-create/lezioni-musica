@@ -812,7 +812,7 @@ Released under the MIT license: http://jsbin.mit-license.org
     }
 
     let blockPayments = JSON.parse(localStorage.getItem('music_app_block_payments') || '{}');
-    let googleTokenClient = null, googleAccessToken = null, googlePollTimer = null, googleSyncTimer = null;
+    let googleTokenClient = null, googleAccessToken = sessionStorage.getItem('music_google_token') || null, googlePollTimer = null, googleSyncTimer = null;
     let googleLastCloudModified = '', googleSyncBusy = false, googleBackupQueued = false;
     let googleLastLocalEdit = Number(localStorage.getItem('music_app_local_edit') || 0);
     const googleDataFileName = 'registro-lezioni-musica-backup.json';
@@ -873,6 +873,7 @@ Released under the MIT license: http://jsbin.mit-license.org
           callback:async response=>{
             if(response.error){googleStatus('Accesso Google non riuscito: '+response.error);return;}
             googleAccessToken=response.access_token;
+            sessionStorage.setItem('music_google_token', googleAccessToken);
             document.getElementById('googleSignInBtn').classList.add('hidden');
             document.getElementById('googleEditBtn').classList.add('hidden');
             googleStatus('Accesso riuscito. Sincronizzazione iniziale…');
@@ -908,7 +909,11 @@ Released under the MIT license: http://jsbin.mit-license.org
       const raw=await response.text();
       let data=null;
       try { data=raw?JSON.parse(raw):null; } catch (_) { data=null; }
-      if(response.status===401){googleAccessToken=null;throw new Error('Sessione Google scaduta. Premi Accedi con Google e riprova.');}
+      if(response.status===401){
+        googleAccessToken=null;
+        sessionStorage.removeItem('music_google_token');
+        throw new Error('Sessione Google scaduta. Premi Accedi con Google e riprova.');
+      }
       if(!response.ok){const detail=data?.error?.message||raw||response.statusText;throw new Error('Google Drive ('+response.status+'): '+detail);}
       return data;
     }
@@ -960,8 +965,6 @@ Released under the MIT license: http://jsbin.mit-license.org
       try {
         const file=await findMusicDriveFile();
         if(!file){await driveBackup(true);return;}
-        // Se ci sono modifiche locali non ancora caricate, caricale prima di confrontare
-        // modifiedTime: il file cloud potrebbe essere invariato proprio perché il backup è fallito.
         if(googleLastLocalEdit){await driveBackup(true);return;}
         if(file.modifiedTime&&file.modifiedTime===googleLastCloudModified){
           googleStatus('☁️ Connesso · dati già sincronizzati · '+new Date().toLocaleTimeString('it-IT'));
@@ -1003,7 +1006,8 @@ Released under the MIT license: http://jsbin.mit-license.org
     function googleSignOut() {
       if(googlePollTimer)clearInterval(googlePollTimer);googlePollTimer=null;
       if(googleAccessToken&&window.google?.accounts?.oauth2)window.google.accounts.oauth2.revoke(googleAccessToken,()=>{});
-      googleAccessToken=null;googleTokenClient=null;
+      googleAccessToken=null;
+      sessionStorage.removeItem('music_google_token');
       document.getElementById('googleSignInBtn').classList.remove('hidden');
       if(localStorage.getItem('music_google_client_id'))document.getElementById('googleEditBtn').classList.remove('hidden');
       googleStatus('Disconnesso. I dati locali restano disponibili.');
@@ -1013,7 +1017,19 @@ Released under the MIT license: http://jsbin.mit-license.org
     window.addEventListener('load',()=>{
       const savedId=localStorage.getItem('music_google_client_id')||'';
       document.getElementById('googleClientId').value=savedId;
-      if(savedId){document.getElementById('googleConfigNotice').classList.add('hidden');showGoogleConfigSaved();loadGoogleLibrary().then(()=>initGoogle()).catch(()=>googleStatus('Client ID salvato. Premi Salva configurazione per riprovare.'));}
+      if(savedId){
+        document.getElementById('googleConfigNotice').classList.add('hidden');
+        showGoogleConfigSaved();
+        loadGoogleLibrary().then(()=>{
+          initGoogle();
+          if(googleAccessToken){
+            document.getElementById('googleSignInBtn').classList.add('hidden');
+            document.getElementById('googleEditBtn').classList.add('hidden');
+            googleStatus('Sessione ripristinata. Sincronizzazione attiva…');
+            startMusicSync();
+          }
+        }).catch(()=>googleStatus('Client ID salvato. Premi Salva configurazione per riprovare.'));
+      }
       document.getElementById('googleAutoSync').checked=localStorage.getItem('music_google_auto_sync')!=='false';
     });
 
@@ -1270,3 +1286,4 @@ Released under the MIT license: http://jsbin.mit-license.org
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4bc70e2c01a94c73b74392e4234840661791215815920" integrity="sha512-L0ha0OXavK/8okipN9F8BtP84dg9DUhPERbBXzwI6dgTA55d2+yweo3pn5CSFYs45/r8md2+xvUPtTdvTNRfjA==" data-cf-beacon='{"version":"2024.11.0","token":"480c9d8468c44ad3bed3c74fbcc6d6f3","r":1,"spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
+ 
