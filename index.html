@@ -1,50 +1,32 @@
 <!DOCTYPE html>
-<!--
-Created using JS Bin
-http://jsbin.com
-
-Copyright (c) 2026 by anonymous (http://jsbin.com/biceyepexi/1/edit)
-
-Released under the MIT license: http://jsbin.mit-license.org
--->
-<meta name="robots" content="noindex">
-<!--
-Created using JS Bin
-http://jsbin.com
-
-Copyright (c) 2026 by anonymous (http://jsbin.com/tagemajita/6/edit)
-
-Released under the MIT license: http://jsbin.mit-license.org
--->
-<meta name="robots" content="noindex">
 <html lang="it">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Registro Lezioni Musica</title>
   
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- SheetJS per esportazione Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-  <!-- Google Fonts: Inter (Semplice, pulito e leggibile) -->
+  <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
       --rock-bg: #121212;
-      --rock-card: #1e1e1e;
-      --rock-black: #0a0a0a;
+      /* Vetro trasparente senza sfocatura: sfondo scuro molto leggero */
+      --rock-card: rgba(10, 10, 10, 0.45); 
+      --rock-black: rgba(0, 0, 0, 0.65);
       --rock-red: #ff2a2a;
       --rock-gold: #ffb703;
       --rock-cyan: #00f0ff;
       --rock-green: #39ff14;
       --rock-purple: #b5179e;
       --rock-orange: #ff6000;
-      --rock-text: #f0f0f0;
-      --rock-border: #333333;
+      --rock-text: #ffffff;
+      --rock-border: rgba(255, 255, 255, 0.3);
     }
 
     * { 
@@ -60,14 +42,27 @@ Released under the MIT license: http://jsbin.mit-license.org
       background-color: var(--rock-bg); 
       color: var(--rock-text); 
       padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); 
-      background-image: 
-        radial-gradient(#222 15%, transparent 16%),
-        radial-gradient(#222 15%, transparent 16%);
-      background-size: 20px 20px;
-      background-position: 0 0, 10px 10px;
+      min-height: 100vh;
+      position: relative;
     }
 
-    /* SFONDO MUSICALE DECORATIVO */
+    /* SFONDO NITIDO (SENZA FILTRI O SFOCATURE) */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('https://lh3.googleusercontent.com/d/1vvePxbP0DuQV1ohg6A_z-bSpF_f065Dq');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      filter: brightness(0.75); /* Sfondo nitido e luminoso */
+      z-index: -1;
+    }
+
+    /* ELEMENTI MUSICALI DI SFONDO */
     .musical-bg-decor {
       position: fixed;
       top: 0;
@@ -85,16 +80,16 @@ Released under the MIT license: http://jsbin.mit-license.org
       align-content: space-around;
     }
 
-    /* HEADER */
+    /* HEADER VETRO TRASPARENTE NITIDO */
     header { 
-      background-color: var(--rock-black); 
+      background-color: rgba(0, 0, 0, 0.6); 
       color: var(--rock-red); 
       padding: 12px 16px; 
       position: sticky; 
       top: 0; 
       z-index: 30; 
       border-bottom: 3px solid var(--rock-red); 
-      box-shadow: 0 4px 15px rgba(255, 42, 42, 0.3);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
@@ -102,10 +97,11 @@ Released under the MIT license: http://jsbin.mit-license.org
 
     header h1 { 
       font-size: 20px; 
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
       color: var(--rock-red);
+      text-shadow: 2px 2px 4px #000000;
     }
 
     header p { 
@@ -113,6 +109,8 @@ Released under the MIT license: http://jsbin.mit-license.org
       color: var(--rock-gold); 
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      font-weight: 600;
+      text-shadow: 1px 1px 3px #000000;
     }
 
     main { 
@@ -123,58 +121,66 @@ Released under the MIT license: http://jsbin.mit-license.org
       z-index: 10;
     }
 
-    /* CARD */
+    /* CARD EFFETTO VETRO TRASPARENTE SENZA SFOCATURA */
     .card { 
       background: var(--rock-card); 
       border-radius: 12px; 
       padding: 16px; 
       margin-bottom: 20px; 
-      border: 2px solid var(--rock-border); 
-      box-shadow: 0 6px 12px rgba(0,0,0,0.5); 
+      border: 1.5px solid var(--rock-border); 
+      box-shadow: 0 8px 25px rgba(0,0,0,0.5); 
     }
 
     .card-title { 
       font-size: 17px; 
-      font-weight: 600;
+      font-weight: 700;
       color: var(--rock-gold); 
       margin-bottom: 12px; 
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
+      text-shadow: 1px 1px 3px #000000;
     }
 
     .badge { 
       font-size: 11px; 
-      background: var(--rock-black); 
+      background: rgba(0, 0, 0, 0.7); 
       color: var(--rock-cyan); 
       padding: 4px 10px; 
       border-radius: 20px; 
       border: 1px solid var(--rock-cyan);
+      font-weight: 600;
+      text-shadow: none;
     }
 
     label { 
       display: block; 
       font-size: 12px; 
-      color: #bbbbbb; 
+      color: #ffffff; 
       text-transform: uppercase; 
       letter-spacing: 0.5px;
       margin-bottom: 6px; 
+      font-weight: 700;
+      text-shadow: 1px 1px 3px #000000;
     }
 
     input, select { 
       width: 100%; 
       padding: 12px; 
-      background: var(--rock-black); 
+      background: rgba(0, 0, 0, 0.65); 
       border: 1.5px solid var(--rock-border); 
       border-radius: 8px; 
       color: var(--rock-text);
       font-size: 14px; 
       outline: none; 
       margin-bottom: 14px; 
+      font-weight: 500;
     }
 
     input:focus, select:focus { 
       border-color: var(--rock-red);
+      box-shadow: 0 0 10px rgba(255, 42, 42, 0.6);
+      background: rgba(0, 0, 0, 0.85);
     }
 
     /* PULSANTI */
@@ -183,28 +189,29 @@ Released under the MIT license: http://jsbin.mit-license.org
       background: linear-gradient(180deg, #ff4d4d 0%, #cc0000 100%); 
       color: #ffffff; 
       font-size: 15px;
-      font-weight: 500;
+      font-weight: 600;
       letter-spacing: 0.5px;
       padding: 12px; 
-      border: none; 
+      border: 1px solid rgba(255, 255, 255, 0.3); 
       border-radius: 8px; 
       cursor: pointer; 
       display: flex; 
       align-items: center; 
       justify-content: center; 
       gap: 8px; 
-      box-shadow: 0 4px 10px rgba(204, 0, 0, 0.4); 
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6); 
       text-transform: uppercase;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
     }
 
     .btn:active { 
       transform: translateY(2px);
     }
 
-    .btn-excel { background: linear-gradient(180deg, #00f0ff 0%, #0088cc 100%); color: #000; }
-    .btn-secondary { background: linear-gradient(180deg, #ffc107 0%, #ff8f00 100%); color: #000; }
+    .btn-excel { background: linear-gradient(180deg, #00f0ff 0%, #0088cc 100%); color: #000; text-shadow: none; font-weight: 700; }
+    .btn-secondary { background: linear-gradient(180deg, #ffc107 0%, #ff8f00 100%); color: #000; text-shadow: none; font-weight: 700; }
     .btn-pink { background: linear-gradient(180deg, #e040fb 0%, #aa00ff 100%); color: #fff; }
-    .btn-danger { background: linear-gradient(180deg, #333 0%, #111 100%); color: var(--rock-red); border: 1px solid var(--rock-red); }
+    .btn-danger { background: linear-gradient(180deg, rgba(60,0,0,0.8) 0%, rgba(20,0,0,0.9) 100%); color: var(--rock-red); border: 1px solid var(--rock-red); }
 
     /* RIEPILOGO MENSILE */
     .grid-3 { 
@@ -218,8 +225,8 @@ Released under the MIT license: http://jsbin.mit-license.org
     .stat-box { 
       padding: 8px; 
       border-radius: 8px; 
-      background: var(--rock-black);
-      border: 1px solid var(--rock-border); 
+      background: rgba(0, 0, 0, 0.6);
+      border: 1.5px solid var(--rock-border); 
     }
 
     .stat-box.green { border-color: var(--rock-green); color: var(--rock-green); }
@@ -228,11 +235,11 @@ Released under the MIT license: http://jsbin.mit-license.org
     .stat-box.purple { border-color: var(--rock-purple); color: var(--rock-purple); }
     .stat-box.orange { border-color: var(--rock-orange); color: var(--rock-orange); }
 
-    .stat-num { font-size: 18px; font-weight: 500; }
-    .stat-desc { font-size: 10px; text-transform: uppercase; }
+    .stat-num { font-size: 19px; font-weight: 700; text-shadow: 1px 1px 3px #000; }
+    .stat-desc { font-size: 10px; text-transform: uppercase; font-weight: 600; }
 
     .total-banner { 
-      background: var(--rock-black); 
+      background: rgba(0, 0, 0, 0.65); 
       color: var(--rock-text); 
       border-radius: 12px; 
       padding: 16px; 
@@ -241,25 +248,28 @@ Released under the MIT license: http://jsbin.mit-license.org
       align-items: center; 
       margin-bottom: 20px; 
       border: 2px solid var(--rock-gold);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.6);
     }
 
     .total-amount { 
       font-size: 26px; 
-      font-weight: 600;
+      font-weight: 700;
       color: var(--rock-gold); 
+      text-shadow: 1px 1px 3px #000;
     }
 
-    /* BARRA DI NAVIGAZIONE */
+    /* BARRA DI NAVIGAZIONE TRASPARENTE */
     nav { 
       position: fixed; 
       bottom: 0; 
       left: 0; 
       right: 0; 
-      background: var(--rock-black); 
+      background: rgba(0, 0, 0, 0.75); 
       border-top: 2px solid var(--rock-red); 
       padding: 10px 8px; 
       padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); 
       z-index: 40; 
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.7);
     }
 
     .nav-container { 
@@ -272,9 +282,9 @@ Released under the MIT license: http://jsbin.mit-license.org
     .nav-btn { 
       border: 1px solid transparent; 
       background: none; 
-      color: #888; 
+      color: #ccc; 
       font-size: 11px; 
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer; 
       display: flex; 
       flex-direction: column; 
@@ -282,10 +292,11 @@ Released under the MIT license: http://jsbin.mit-license.org
       gap: 2px; 
       padding: 6px 8px;
       border-radius: 8px;
+      text-shadow: 1px 1px 2px #000;
     }
 
     .nav-btn.active { 
-      background: var(--rock-card); 
+      background: rgba(255, 42, 42, 0.25); 
       color: var(--rock-red);
       border-color: var(--rock-red);
     }
@@ -302,7 +313,8 @@ Released under the MIT license: http://jsbin.mit-license.org
       padding: 10px 20px; 
       border-radius: 30px; 
       font-size: 13px; 
-      box-shadow: 0 0 15px rgba(255,42,42,0.6);
+      font-weight: 700;
+      box-shadow: 0 0 15px rgba(255,42,42,0.8);
       opacity: 0; 
       transition: opacity 0.3s; 
       pointer-events: none; 
@@ -313,7 +325,7 @@ Released under the MIT license: http://jsbin.mit-license.org
 
     .date-ctrl { display: flex; gap: 8px; align-items: center; }
     .date-ctrl button { 
-      background: var(--rock-black); 
+      background: rgba(0, 0, 0, 0.65); 
       color: var(--rock-red);
       border: 1.5px solid var(--rock-red); 
       border-radius: 8px; 
@@ -321,6 +333,7 @@ Released under the MIT license: http://jsbin.mit-license.org
       height: 42px; 
       font-size: 16px; 
       cursor: pointer; 
+      font-weight: bold;
     }
 
     .date-ctrl button:active {
@@ -343,10 +356,7 @@ Released under the MIT license: http://jsbin.mit-license.org
       <h1>🎸 Lezioni Musica 🥁</h1>
       <p>Registro & Contabilità</p>
     </div>
-    <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-shrink:0;">
-      <button type="button" id="googleSignInBtn" onclick="googleSignIn()" style="width:auto;flex:none;background:#fff;color:#064e3b;border:1px solid rgba(255,255,255,.7);border-radius:8px;padding:6px 8px;font-size:12px;font-weight:600;line-height:1.25;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.12);cursor:pointer;">Accedi con Google</button>
-      <button onclick="switchTab('options')" aria-label="Impostazioni" style="background:var(--rock-black); color:var(--rock-gold); border:1.5px solid var(--rock-gold); border-radius:50%; width:38px; height:38px; font-size:16px; cursor:pointer;flex-shrink:0;">⚙️</button>
-    </div>
+    <button onclick="switchTab('options')" style="background:rgba(0,0,0,0.65); color:var(--rock-gold); border:1.5px solid var(--rock-gold); border-radius:50%; width:38px; height:38px; font-size:16px; cursor:pointer;">⚙️</button>
   </header>
 
   <div id="toast">Salvato con successo!</div>
@@ -430,9 +440,9 @@ Released under the MIT license: http://jsbin.mit-license.org
         <div class="card-title">
           <div>
             <div id="summary-child1-name">Bambino 1</div>
-            <div id="summary-child1-sub" style="font-size:11px; color:#aaa;">🥁 Batteria • € 22,50/lez.</div>
+            <div id="summary-child1-sub" style="font-size:11px; color:#ffffff; text-shadow:1px 1px 2px #000;">🥁 Batteria • € 22,50/lez.</div>
           </div>
-          <span id="summary-child1-price-total" style="font-size:22px; font-weight:600; color:var(--rock-gold);">€ 0,00</span>
+          <span id="summary-child1-price-total" style="font-size:22px; font-weight:700; color:var(--rock-gold);">€ 0,00</span>
         </div>
 
         <div class="grid-3">
@@ -466,9 +476,9 @@ Released under the MIT license: http://jsbin.mit-license.org
         <div class="card-title">
           <div>
             <div id="summary-child2-name">Bambino 2</div>
-            <div id="summary-child2-sub" style="font-size:11px; color:#aaa;">🎸 Chitarra • € 20,00/lez.</div>
+            <div id="summary-child2-sub" style="font-size:11px; color:#ffffff; text-shadow:1px 1px 2px #000;">🎸 Chitarra • € 20,00/lez.</div>
           </div>
-          <span id="summary-child2-price-total" style="font-size:22px; font-weight:600; color:var(--rock-gold);">€ 0,00</span>
+          <span id="summary-child2-price-total" style="font-size:22px; font-weight:700; color:var(--rock-gold);">€ 0,00</span>
         </div>
 
         <div class="grid-3">
@@ -500,8 +510,8 @@ Released under the MIT license: http://jsbin.mit-license.org
       <!-- Totale Complessivo Mensile -->
       <div class="total-banner">
         <div>
-          <div style="font-size:11px; text-transform:uppercase;">Totale Mese</div>
-          <div style="font-size:10px; opacity:0.8;">Somma lezioni fatte e pagate</div>
+          <div style="font-size:11px; text-transform:uppercase; font-weight:700; text-shadow:1px 1px 2px #000;">Totale Mese</div>
+          <div style="font-size:10px; opacity:0.9; text-shadow:1px 1px 2px #000;">Somma lezioni fatte e pagate</div>
         </div>
         <div id="grand-total-price" class="total-amount">€ 0,00</div>
       </div>
@@ -521,7 +531,7 @@ Released under the MIT license: http://jsbin.mit-license.org
       
       <div class="card">
         <div class="card-title">Blocchi da 4 Lezioni</div>
-        <p style="font-size:11px; color:#aaa; margin-bottom:12px;">Riepilogo dei cicli di 4 lezioni (fatte o pagate) per ciascun bambino con calcolo del totale.</p>
+        <p style="font-size:11px; color:#ffffff; margin-bottom:12px; text-shadow:1px 1px 2px #000;">Riepilogo dei cicli di 4 lezioni (fatte o pagate) per ciascun bambino con calcolo del totale.</p>
         
         <div id="blocks-container">
           <!-- Popolato via JS -->
@@ -576,7 +586,7 @@ Released under the MIT license: http://jsbin.mit-license.org
 
       <div class="card">
         <label>Esportazione & Backup Dati</label>
-        <p style="font-size:11px; margin-bottom:12px; color:#aaa;">Esporta i dati in formato Excel o trasferisci il backup su altri dispositivi.</p>
+        <p style="font-size:11px; margin-bottom:12px; color:#ffffff; text-shadow:1px 1px 2px #000;">Esporta i dati in formato Excel o trasferisci il backup su altri dispositivi.</p>
         
         <button onclick="exportToExcel()" class="btn btn-excel" style="margin-bottom:10px;">
           📊 ESPORTA IN EXCEL (.XLSX)
@@ -594,30 +604,6 @@ Released under the MIT license: http://jsbin.mit-license.org
         <button onclick="clearData()" class="btn btn-danger">
           🗑️ CANCELLA TUTTI I DATI
         </button>
-      </div>
-
-      <div class="card" id="google-drive-card">
-        <div class="card-title">☁️ Google Drive</div>
-        <p style="font-size:12px;color:#bbb;line-height:1.5;margin-bottom:12px;">Accedi con Google per salvare e sincronizzare registro lezioni, impostazioni dei bambini e pagamenti su altri dispositivi.</p>
-        <div id="googleConfigFields">
-          <div id="googleConfigNotice" style="background:#332a12;border:1px solid #80631a;color:#ffdb78;border-radius:8px;padding:10px;font-size:12px;margin-bottom:12px;">Inserisci il Client ID OAuth di Google Cloud, quindi salva la configurazione.</div>
-          <label>Google OAuth Client ID</label>
-          <input id="googleClientId" autocomplete="off" placeholder="123456789-abc....apps.googleusercontent.com">
-          <button class="btn btn-secondary" onclick="saveGoogleConfig()" style="margin-bottom:10px;">SALVA CONFIGURAZIONE</button>
-        </div>
-        <div id="googleConfigSaved" class="hidden" style="border:1px solid var(--rock-green);border-radius:8px;padding:10px;color:var(--rock-green);font-size:12px;margin-bottom:10px;">Client ID configurato su questo dispositivo.</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-          <button id="googleEditBtn" class="btn btn-danger hidden" onclick="editGoogleConfig()" style="width:auto;flex:1;font-size:12px;padding:10px;">MODIFICA CLIENT ID</button>
-
-          <button id="googleSignOutBtn" class="btn btn-danger" onclick="googleSignOut()" style="width:auto;flex:1;font-size:12px;padding:10px;">ESCI</button>
-        </div>
-        <p id="googleStatus" role="status" style="font-size:12px;color:#bbb;margin-bottom:12px;">Non collegato a Google Drive.</p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-          <button class="btn" onclick="driveBackup()" style="flex:1;font-size:12px;">☁️ BACKUP SU DRIVE</button>
-          <button class="btn btn-secondary" onclick="driveRestore()" style="flex:1;font-size:12px;">↩ RIPRISTINA DA DRIVE</button>
-        </div>
-        <label style="display:flex;align-items:flex-start;gap:8px;text-transform:none;font-size:12px;"><input id="googleAutoSync" type="checkbox" checked style="width:18px;margin:0;" onchange="saveAutoSync()"> <span>Sincronizzazione automatica: carica le modifiche e controlla Drive ogni 5 secondi mentre l’app è aperta e connessa.</span></label>
-        <p style="font-size:11px;color:#888;margin-top:10px;line-height:1.5;">Il backup è conservato nell’area privata dell’app su Google Drive (appDataFolder). L’accesso richiede un dominio HTTPS autorizzato; aprire il solo file HTML non è sufficiente.</p>
       </div>
     </section>
 
@@ -730,7 +716,6 @@ Released under the MIT license: http://jsbin.mit-license.org
       };
 
       localStorage.setItem('music_app_entries', JSON.stringify(entries));
-      markMusicEdited();
       showToast("Salvataggio completato!");
     }
 
@@ -771,14 +756,14 @@ Released under the MIT license: http://jsbin.mit-license.org
 
           if ((entry.child1 && entry.child1.status !== 'none') || (entry.child2 && entry.child2.status !== 'none')) {
             const formattedDate = date.split('-').reverse().join('/');
-            historyHtml += `<div style="padding:8px 0; border-bottom:1px solid #333;">
-              <span style="color:var(--rock-gold);">${formattedDate}</span>`;
+            historyHtml += `<div style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.2);">
+              <span style="color:var(--rock-gold); font-weight:700; text-shadow:1px 1px 2px #000;">${formattedDate}</span>`;
             
             if (entry.child1 && entry.child1.status !== 'none') {
-              historyHtml += `<div style="display:flex; justify-content:space-between;"><span>${config.child1.name}:</span> <span>${getStatusLabel(entry.child1.status)}</span></div>`;
+              historyHtml += `<div style="display:flex; justify-content:space-between; text-shadow:1px 1px 2px #000;"><span>${config.child1.name}:</span> <span>${getStatusLabel(entry.child1.status)}</span></div>`;
             }
             if (entry.child2 && entry.child2.status !== 'none') {
-              historyHtml += `<div style="display:flex; justify-content:space-between;"><span>${config.child2.name}:</span> <span>${getStatusLabel(entry.child2.status)}</span></div>`;
+              historyHtml += `<div style="display:flex; justify-content:space-between; text-shadow:1px 1px 2px #000;"><span>${config.child2.name}:</span> <span>${getStatusLabel(entry.child2.status)}</span></div>`;
             }
             historyHtml += `</div>`;
           }
@@ -808,237 +793,16 @@ Released under the MIT license: http://jsbin.mit-license.org
       const grandTotal = c1PriceTotal + c2PriceTotal;
       document.getElementById('grand-total-price').innerText = `€ ${grandTotal.toFixed(2)}`;
 
-      document.getElementById('monthly-history-list').innerHTML = historyHtml || `<p style="color:#666; font-style:italic;">Nessuna lezione registrata per questo mese.</p>`;
+      document.getElementById('monthly-history-list').innerHTML = historyHtml || `<p style="color:#ffffff; font-style:italic; text-shadow:1px 1px 2px #000;">Nessuna lezione registrata per questo mese.</p>`;
     }
 
     let blockPayments = JSON.parse(localStorage.getItem('music_app_block_payments') || '{}');
-    let googleTokenClient = null, googleAccessToken = sessionStorage.getItem('music_google_token') || null, googlePollTimer = null, googleSyncTimer = null;
-    let googleLastCloudModified = '', googleSyncBusy = false, googleBackupQueued = false;
-    let googleLastLocalEdit = Number(localStorage.getItem('music_app_local_edit') || 0);
-    const googleDataFileName = 'registro-lezioni-musica-backup.json';
-    function markMusicEdited() {
-      googleLastLocalEdit = Date.now();
-      localStorage.setItem('music_app_local_edit', String(googleLastLocalEdit));
-      if (googleAccessToken) {
-        clearTimeout(googleSyncTimer);
-        googleSyncTimer = setTimeout(() => driveBackup(true), 900);
-      }
-    }
-    function musicSnapshot() { return { format:'registro-lezioni-musica', version:1, updatedAt:new Date().toISOString(), config, entries, blockPayments }; }
-    function applyMusicSnapshot(data, modifiedTime, quiet=false) {
-      if (!data || !data.config || !data.entries) throw new Error('Il backup non contiene dati riconoscibili.');
-      config = data.config; entries = data.entries; blockPayments = data.blockPayments || {};
-      localStorage.setItem('music_app_config', JSON.stringify(config));
-      localStorage.setItem('music_app_entries', JSON.stringify(entries));
-      localStorage.setItem('music_app_block_payments', JSON.stringify(blockPayments));
-      googleLastLocalEdit = 0; localStorage.setItem('music_app_local_edit','0');
-      googleLastCloudModified = modifiedTime || data.updatedAt || '';
-      applyConfig(); loadDateData();
-      if (!document.getElementById('tab-summary').classList.contains('hidden')) renderSummary();
-      if (!document.getElementById('tab-blocks').classList.contains('hidden')) renderBlocks();
-      if (!quiet) showToast('Dati ripristinati da Google Drive.');
-    }
-    function googleStatus(message) { const el=document.getElementById('googleStatus'); if(el) el.textContent=message; }
-    function showGoogleConfigSaved() {
-      document.getElementById('googleConfigFields').classList.add('hidden');
-      document.getElementById('googleConfigSaved').classList.remove('hidden');
-      document.getElementById('googleEditBtn').classList.remove('hidden');
-    }
-    function editGoogleConfig() {
-      document.getElementById('googleConfigFields').classList.remove('hidden');
-      document.getElementById('googleConfigSaved').classList.add('hidden');
-      document.getElementById('googleEditBtn').classList.add('hidden');
-      document.getElementById('googleClientId').value=localStorage.getItem('music_google_client_id')||'';
-    }
-    function loadGoogleLibrary() {
-      return new Promise((resolve,reject)=>{
-        if(window.google?.accounts?.oauth2) return resolve();
-        let script=document.querySelector('script[data-music-google="1"]');
-        if(!script){script=document.createElement('script');script.src='https://accounts.google.com/gsi/client';script.async=true;script.defer=true;script.dataset.musicGoogle='1';document.head.appendChild(script);}
-        let finished=false;
-        const finish=(err)=>{if(finished)return;finished=true;clearTimeout(timer);script.removeEventListener('load',loaded);script.removeEventListener('error',failed);err?reject(err):resolve();};
-        const loaded=()=>window.google?.accounts?.oauth2?finish():finish(new Error('Libreria Google non disponibile.'));
-        const failed=()=>finish(new Error('Impossibile caricare Google. Controlla la connessione.'));
-        script.addEventListener('load',loaded);script.addEventListener('error',failed);
-        const timer=setTimeout(()=>finish(new Error('Google non risponde. Riprova.')),10000);
-      });
-    }
-    function initGoogle() {
-      const id=localStorage.getItem('music_google_client_id');
-      if(!id){googleStatus('Inserisci il Client ID OAuth e salva la configurazione.');return false;}
-      if(!window.google?.accounts?.oauth2){googleStatus('Servizio Google in caricamento…');return false;}
-      try {
-        googleTokenClient=window.google.accounts.oauth2.initTokenClient({
-          client_id:id, scope:'https://www.googleapis.com/auth/drive.appdata',
-          callback:async response=>{
-            if(response.error){googleStatus('Accesso Google non riuscito: '+response.error);return;}
-            googleAccessToken=response.access_token;
-            sessionStorage.setItem('music_google_token', googleAccessToken);
-            document.getElementById('googleSignInBtn').classList.add('hidden');
-            document.getElementById('googleEditBtn').classList.add('hidden');
-            googleStatus('Accesso riuscito. Sincronizzazione iniziale…');
-            await startMusicSync();
-          },
-          error_callback:error=>googleStatus('Impossibile aprire l’accesso Google: '+(error?.type||'errore browser')+'. Verifica HTTPS e popup.')
-        });
-        return true;
-      } catch(e){googleStatus('Client ID non valido: '+e.message);return false;}
-    }
-    async function saveGoogleConfig() {
-      const id=document.getElementById('googleClientId').value.trim();
-      if(!id){googleStatus('Inserisci prima il Client ID OAuth.');return;}
-      localStorage.setItem('music_google_client_id',id);
-      document.getElementById('googleConfigNotice').classList.add('hidden');
-      googleStatus('Configurazione salvata. Verifico Google…');
-      try{await loadGoogleLibrary();if(initGoogle()){showGoogleConfigSaved();googleStatus('Configurazione salvata. Ora premi Accedi con Google.');}}
-      catch(e){googleStatus('Configurazione salvata, ma Google non è disponibile: '+e.message);}
-    }
-    async function googleSignIn() {
-      try {
-        const id=document.getElementById('googleClientId').value.trim()||localStorage.getItem('music_google_client_id')||'';
-        if(!id){googleStatus('Inserisci il Client ID OAuth e premi Salva configurazione.');document.getElementById('googleClientId').focus();return;}
-        localStorage.setItem('music_google_client_id',id);
-        if(location.protocol!=='https:'&&location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'){googleStatus('Per accedere a Google, pubblica l’app su HTTPS e autorizza il dominio in Google Cloud.');return;}
-        await loadGoogleLibrary();if(!initGoogle()||!googleTokenClient)throw new Error('Impossibile inizializzare Google.');
-        showGoogleConfigSaved();googleStatus('Apro la finestra di accesso Google…');googleTokenClient.requestAccessToken();
-      } catch(e){googleStatus('Accesso non avviato: '+e.message);}
-    }
-    async function musicApi(url, options={}) {
-      if(!googleAccessToken)throw new Error('Accedi prima a Google.');
-      const response=await fetch(url,{...options,headers:{Authorization:'Bearer '+googleAccessToken,...(options.headers||{})}});
-      const raw=await response.text();
-      let data=null;
-      try { data=raw?JSON.parse(raw):null; } catch (_) { data=null; }
-      if(response.status===401){
-        googleAccessToken=null;
-        sessionStorage.removeItem('music_google_token');
-        throw new Error('Sessione Google scaduta. Premi Accedi con Google e riprova.');
-      }
-      if(!response.ok){const detail=data?.error?.message||raw||response.statusText;throw new Error('Google Drive ('+response.status+'): '+detail);}
-      return data;
-    }
-    async function findMusicDriveFile() {
-      const q=encodeURIComponent("name='"+googleDataFileName+"' and 'appDataFolder' in parents and trashed=false");
-      const result=await musicApi('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q='+q+'&fields=files(id,name,modifiedTime)');
-      return result.files?.[0]||null;
-    }
-    async function driveBackup(silent=false) {
-      if(!googleAccessToken){if(!silent)googleStatus('Premi prima Accedi con Google.');return false;}
-      if(googleSyncBusy){googleBackupQueued=true;return false;}
-      googleSyncBusy=true;
-      let succeeded=false;
-      try {
-        if(!silent)googleStatus('Caricamento dei dati su Google Drive…');
-        const file=await findMusicDriveFile(), stamp=new Date().toISOString();
-        const snapshot=musicSnapshot();snapshot.updatedAt=stamp;
-        const boundary='music_boundary_'+Date.now()+'_'+Math.random().toString(16).slice(2);
-        const metadata={name:googleDataFileName,mimeType:'application/json',...(file?{}:{parents:['appDataFolder']})};
-        const url=file?'https://www.googleapis.com/upload/drive/v3/files/'+encodeURIComponent(file.id)+'?uploadType=multipart&fields=id,name,modifiedTime':'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,modifiedTime';
-        const body='--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(metadata)+'\r\n--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(snapshot)+'\r\n--'+boundary+'--';
-        const response=await fetch(url,{method:file?'PATCH':'POST',headers:{Authorization:'Bearer '+googleAccessToken,'Content-Type':'multipart/related; boundary='+boundary},body});
-        const raw=await response.text(); let result=null; try{result=raw?JSON.parse(raw):null;}catch(_){result=null;}
-        if(!response.ok)throw new Error('Google Drive ('+response.status+'): '+(result?.error?.message||raw||response.statusText));
-        googleLastCloudModified=result?.modifiedTime||stamp;
-        googleLastLocalEdit=0;localStorage.setItem('music_app_local_edit','0');
-        succeeded=true;
-        googleStatus('☁️ Sincronizzato su Google Drive alle '+new Date().toLocaleTimeString('it-IT')+'.');
-      } catch(e) {
-        googleStatus('Errore sincronizzazione cloud: '+e.message);
-      } finally {
-        googleSyncBusy=false;
-        if(googleBackupQueued){googleBackupQueued=false;if(googleAccessToken&&googleLastLocalEdit){clearTimeout(googleSyncTimer);googleSyncTimer=setTimeout(()=>driveBackup(true),500);}}
-      }
-      return succeeded;
-    }
-    async function driveRestore() {
-      try {
-        if(!googleAccessToken)throw new Error('Premi prima Accedi con Google.');
-        googleStatus('Ricerca del backup su Drive…');
-        const file=await findMusicDriveFile();if(!file)throw new Error('Non trovo un backup su questo account Google.');
-        const data=await musicApi('https://www.googleapis.com/drive/v3/files/'+file.id+'?alt=media');
-        if(!confirm('Il ripristino sostituirà registro, impostazioni e pagamenti locali con i dati di Google Drive. Continuare?'))return;
-        applyMusicSnapshot(data,file.modifiedTime);googleStatus('Ripristino completato da Google Drive.');
-      } catch(e){googleStatus('Ripristino non riuscito: '+e.message);}
-    }
-    async function syncMusicFromCloud() {
-      if(!googleAccessToken||googleSyncBusy||document.hidden)return;
-      try {
-        const file=await findMusicDriveFile();
-        if(!file){await driveBackup(true);return;}
-        if(googleLastLocalEdit){await driveBackup(true);return;}
-        if(file.modifiedTime&&file.modifiedTime===googleLastCloudModified){
-          googleStatus('☁️ Connesso · dati già sincronizzati · '+new Date().toLocaleTimeString('it-IT'));
-          return;
-        }
-        const data=await musicApi('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(file.id)+'?alt=media');
-        const cloudTime=Date.parse(data.updatedAt||file.modifiedTime||0);
-        if(googleLastLocalEdit&&googleLastLocalEdit>cloudTime){await driveBackup(true);return;}
-        applyMusicSnapshot(data,file.modifiedTime,true);
-        googleStatus('☁️ Dati aggiornati da Google Drive · '+new Date().toLocaleTimeString('it-IT'));
-      } catch(e){googleStatus('Errore sincronizzazione cloud: '+e.message);}
-    }
-    async function startMusicSync() {
-      try {
-        googleStatus('Verifico i dati locali e Google Drive…');
-        const file=await findMusicDriveFile();
-        if(file){
-          const data=await musicApi('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(file.id)+'?alt=media');
-          if(googleLastLocalEdit){
-            const ok=await driveBackup(true);
-            if(ok)googleStatus('☁️ Modifiche locali caricate su Google Drive.');
-          } else {
-            applyMusicSnapshot(data,file.modifiedTime,true);
-            googleStatus('☁️ Dati scaricati da Google Drive. Sincronizzazione automatica attiva.');
-          }
-        } else {
-          const ok=await driveBackup(true);
-          if(ok)googleStatus('☁️ Primo backup creato su Google Drive. Sincronizzazione automatica attiva.');
-        }
-      } catch(e){googleStatus('Errore sincronizzazione iniziale: '+e.message);}
-      if(googlePollTimer)clearInterval(googlePollTimer);
-      if(document.getElementById('googleAutoSync').checked)googlePollTimer=setInterval(syncMusicFromCloud,5000);
-    }
-    function saveAutoSync() {
-      if(document.getElementById('googleAutoSync').checked&&googleAccessToken){if(googlePollTimer)clearInterval(googlePollTimer);googlePollTimer=setInterval(syncMusicFromCloud,5000);syncMusicFromCloud();}
-      else if(googlePollTimer){clearInterval(googlePollTimer);googlePollTimer=null;}
-      localStorage.setItem('music_google_auto_sync',document.getElementById('googleAutoSync').checked?'true':'false');
-    }
-    function googleSignOut() {
-      if(googlePollTimer)clearInterval(googlePollTimer);googlePollTimer=null;
-      if(googleAccessToken&&window.google?.accounts?.oauth2)window.google.accounts.oauth2.revoke(googleAccessToken,()=>{});
-      googleAccessToken=null;
-      sessionStorage.removeItem('music_google_token');
-      document.getElementById('googleSignInBtn').classList.remove('hidden');
-      if(localStorage.getItem('music_google_client_id'))document.getElementById('googleEditBtn').classList.remove('hidden');
-      googleStatus('Disconnesso. I dati locali restano disponibili.');
-    }
-    window.addEventListener('online',()=>{if(googleAccessToken)syncMusicFromCloud();});
-    document.addEventListener('visibilitychange',()=>{if(!document.hidden&&googleAccessToken)syncMusicFromCloud();});
-    window.addEventListener('load',()=>{
-      const savedId=localStorage.getItem('music_google_client_id')||'';
-      document.getElementById('googleClientId').value=savedId;
-      if(savedId){
-        document.getElementById('googleConfigNotice').classList.add('hidden');
-        showGoogleConfigSaved();
-        loadGoogleLibrary().then(()=>{
-          initGoogle();
-          if(googleAccessToken){
-            document.getElementById('googleSignInBtn').classList.add('hidden');
-            document.getElementById('googleEditBtn').classList.add('hidden');
-            googleStatus('Sessione ripristinata. Sincronizzazione attiva…');
-            startMusicSync();
-          }
-        }).catch(()=>googleStatus('Client ID salvato. Premi Salva configurazione per riprovare.'));
-      }
-      document.getElementById('googleAutoSync').checked=localStorage.getItem('music_google_auto_sync')!=='false';
-    });
 
     function saveBlockPayment(childKey, blockId, field, value) {
       if (!blockPayments[childKey]) blockPayments[childKey] = {};
       if (!blockPayments[childKey][blockId]) blockPayments[childKey][blockId] = {};
       blockPayments[childKey][blockId][field] = value;
       localStorage.setItem('music_app_block_payments', JSON.stringify(blockPayments));
-      markMusicEdited();
       renderBlocks();
     }
 
@@ -1060,9 +824,9 @@ Released under the MIT license: http://jsbin.mit-license.org
 
     function buildChildBlocksHtml(childKey, childName, instrument, pricePerLesson, list) {
       if (!list.length) return `<div style="margin-bottom:12px;">
-        <div style="font-weight:600;color:var(--rock-gold);">${childName} (${instrument})</div>
-        <p style="font-size:12px;color:#777;font-style:italic;margin-top:4px;">Nessuna lezione conteggiabile.</p></div>`;
-      let res = `<div style="margin-bottom:12px;"><div style="font-weight:600;color:var(--rock-gold);margin-bottom:8px;">${childName} (${instrument})</div>`;
+        <div style="font-weight:700;color:var(--rock-gold);text-shadow:1px 1px 2px #000;">${childName} (${instrument})</div>
+        <p style="font-size:12px;color:#ffffff;font-style:italic;margin-top:4px;text-shadow:1px 1px 2px #000;">Nessuna lezione conteggiabile.</p></div>`;
+      let res = `<div style="margin-bottom:12px;"><div style="font-weight:700;color:var(--rock-gold);margin-bottom:8px;text-shadow:1px 1px 2px #000;">${childName} (${instrument})</div>`;
       let pendingCredits = [];
       for (let i = 0, blockIndex = 1; i < list.length; i += 4, blockIndex++) {
         const chunk = list.slice(i, i + 4);
@@ -1074,12 +838,11 @@ Released under the MIT license: http://jsbin.mit-license.org
         pendingCredits = [];
         const due = Math.max(0, baseTotal - creditTotal);
         const paid = payment.paid === true || payment.paid === 'true';
-        const safeId = `${childKey}-${blockId}`.replace(/[^a-zA-Z0-9_-]/g,'');
-        res += `<div style="background:var(--rock-black);border:1px solid ${paid?'var(--rock-green)':'var(--rock-border)'};border-radius:8px;padding:10px;margin-bottom:10px;">
-          <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--rock-cyan);">
+        res += `<div style="background:rgba(0,0,0,0.6);border:1px solid ${paid?'var(--rock-green)':'var(--rock-border)'};border-radius:8px;padding:10px;margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:8px;color:var(--rock-cyan);text-shadow:1px 1px 2px #000;">
             <span>Blocco ${blockIndex} (${chunk.length}/4 lezioni)</span><span style="color:var(--rock-gold);">€ ${baseTotal.toFixed(2)}</span>
           </div>
-          <label style="display:flex;align-items:center;gap:8px;color:${paid?'var(--rock-green)':'var(--rock-text)'};font-size:13px;text-transform:none;">
+          <label style="display:flex;align-items:center;gap:8px;color:${paid?'var(--rock-green)':'var(--rock-text)'};font-size:13px;text-transform:none;text-shadow:1px 1px 2px #000;">
             <input type="checkbox" style="width:20px;height:20px;margin:0;" ${paid?'checked':''}
               onchange="saveBlockPayment('${childKey}','${blockId}','paid',this.checked)">
             ${paid?'✅ Blocco pagato':'☐ Segna le 4 lezioni come pagate'}
@@ -1087,18 +850,18 @@ Released under the MIT license: http://jsbin.mit-license.org
           </label>
           <label style="margin-top:10px;">Data pagamento</label>
           <input type="date" value="${payment.date || ''}" onchange="saveBlockPayment('${childKey}','${blockId}','date',this.value)" style="margin-bottom:8px;">
-          <div style="font-size:12px;color:#ccc;margin-bottom:8px;">Importo del blocco: <b>€ ${baseTotal.toFixed(2)}</b>
+          <div style="font-size:12px;color:#ffffff;margin-bottom:8px;text-shadow:1px 1px 2px #000;">Importo del blocco: <b>€ ${baseTotal.toFixed(2)}</b>
             ${paid && payment.date ? ` • Pagato il ${payment.date.split('-').reverse().join('/')}` : ''}
           </div>
           <div style="font-size:12px;display:flex;flex-direction:column;gap:5px;">`;
         chunk.forEach(item => {
           const formattedDate = item.date.split('-').reverse().join('/');
-          res += `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding-bottom:4px;">
-            <span style="color:#ccc;">📅 ${formattedDate}</span><span>${getStatusLabel(item.status)}</span></div>`;
+          res += `<div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.15);padding-bottom:4px;text-shadow:1px 1px 2px #000;">
+            <span style="color:#ffffff;">📅 ${formattedDate}</span><span>${getStatusLabel(item.status)}</span></div>`;
           if (item.status === 'paid_not_done') pendingCredits.push({date:item.date, amount:pricePerLesson});
         });
         if (carryCredits.length) {
-          res += `<div style="margin-top:8px;padding:8px;border:1px solid var(--rock-orange);border-radius:6px;color:var(--rock-orange);">
+          res += `<div style="margin-top:8px;padding:8px;border:1px solid var(--rock-orange);border-radius:6px;color:var(--rock-orange);background:rgba(255,96,0,0.25);">
             <b>↪ Da recuperare nelle prossime 4 lezioni</b>`;
           carryCredits.forEach(item => {
             res += `<div style="display:flex;justify-content:space-between;margin-top:4px;"><span>${item.date.split('-').reverse().join('/')} • lezione pagata non fatta</span><b>− € ${item.amount.toFixed(2)}</b></div>`;
@@ -1133,7 +896,6 @@ Released under the MIT license: http://jsbin.mit-license.org
       config.child2.price = parseFloat(document.getElementById('cfg-child2-price').value) || 0;
 
       localStorage.setItem('music_app_config', JSON.stringify(config));
-      markMusicEdited();
       applyConfig();
       showToast("Impostazioni salvate!");
     }
@@ -1236,7 +998,7 @@ Released under the MIT license: http://jsbin.mit-license.org
     }
 
     function exportData() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ config, entries, blockPayments }));
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ config, entries }));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
       downloadAnchor.setAttribute("download", `backup_lezioni_musica.json`);
@@ -1256,8 +1018,6 @@ Released under the MIT license: http://jsbin.mit-license.org
           if (importedData.config && importedData.entries) {
             localStorage.setItem('music_app_config', JSON.stringify(importedData.config));
             localStorage.setItem('music_app_entries', JSON.stringify(importedData.entries));
-            if (importedData.blockPayments) { blockPayments = importedData.blockPayments; localStorage.setItem('music_app_block_payments', JSON.stringify(blockPayments)); }
-            markMusicEdited();
             config = importedData.config;
             entries = importedData.entries;
             applyConfig();
@@ -1276,13 +1036,11 @@ Released under the MIT license: http://jsbin.mit-license.org
     function clearData() {
       if (confirm("Sei sicuro di voler cancellare tutti i dati registrati?")) {
         localStorage.removeItem('music_app_entries');
-        entries = {}; markMusicEdited();
+        entries = {};
         loadDateData();
         showToast("Dati cancellati.");
       }
     }
   </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4bc70e2c01a94c73b74392e4234840661791215815920" integrity="sha512-L0ha0OXavK/8okipN9F8BtP84dg9DUhPERbBXzwI6dgTA55d2+yweo3pn5CSFYs45/r8md2+xvUPtTdvTNRfjA==" data-cf-beacon='{"version":"2024.11.0","token":"480c9d8468c44ad3bed3c74fbcc6d6f3","r":1,"spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4bc70e2c01a94c73b74392e4234840661791215815920" integrity="sha512-L0ha0OXavK/8okipN9F8BtP84dg9DUhPERbBXzwI6dgTA55d2+yweo3pn5CSFYs45/r8md2+xvUPtTdvTNRfjA==" data-cf-beacon='{"version":"2024.11.0","token":"480c9d8468c44ad3bed3c74fbcc6d6f3","r":1,"spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
